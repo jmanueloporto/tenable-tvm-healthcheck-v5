@@ -1,6 +1,6 @@
 """
 PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.0.6
+VERSION: 5.0.7
 LAYER: Presentation / Reporter
 DESCRIPTION: Decoupled logic for generating human-readable TXT reports.
 AUTHOR: Senior Software Architect

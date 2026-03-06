@@ -1,6 +1,6 @@
 """
 PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.0.6
+VERSION: 5.0.7
 LAYER: Business / Modules
 DESCRIPTION: Generates findings for Domain 5 (Reporting & Hygiene).
 AUTHOR: Senior Software Architect

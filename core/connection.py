@@ -1,6 +1,6 @@
 """
 PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.0.6
+VERSION: 5.0.7
 LAYER: Core / Connection
 DESCRIPTION: Standardized Tenable.io SDK Connection (The missing link).
 AUTHOR: Senior Software Architect

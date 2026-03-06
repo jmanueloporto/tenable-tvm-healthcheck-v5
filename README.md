@@ -1,5 +1,5 @@
 # V5-Tenable Health Check API Automation
-**Current Version: 5.0.6
+**Current Version: 5.0.7
 
 ## Descripción
 Plataforma avanzada de asesoría de postura de seguridad para Tenable Vulnerability Management [cite: 10-11].

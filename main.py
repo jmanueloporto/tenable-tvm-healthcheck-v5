@@ -1,9 +1,9 @@
 """
 PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.0.6
+VERSION: 5.0.7
 LAYER: Orchestration
-DESCRIPTION: Orchestrator integrating Domain 4 (Remediation). 
-             Strict adherence to REST API and official Domain Naming.
+DESCRIPTION: Full Orchestrator (Domains 1-6). 
+             Final Phase 1 maturity assessment via Proxy Indicators.
 AUTHOR: Senior Software Architect
 """
 
@@ -16,17 +16,18 @@ from modules.domain1_assets import run_audit as run_domain1
 from modules.domain2_scans import run_audit as run_domain2
 from modules.domain3_risks import run_audit as run_domain3
 from modules.domain4_remediation import run_audit as run_domain4
+from modules.domain5_6_proxy import run_audit as run_domain56
 
 def main():
     print("="*60)
     print(f"{'V5-TENABLE HEALTH CHECK SYSTEM':^60}")
-    print(f"{'Orchestrator V5.0.6 - Remediation & Response':^60}")
+    print(f"{'Orchestrator V5.0.7 - Full Maturity Audit':^60}")
     print("="*60)
 
     try:
         start_time = time.time()
         
-        # --- PASO 1: Setup ---
+        # --- PASO 1: Setup Core ---
         print("[*] Initializing Core Architecture...")
         conn = TenableConnection()
         collector = TenableDataCollector(conn)
@@ -34,10 +35,10 @@ def main():
         
         all_findings = []
 
-        # --- PASO 2: Data Collection ---
+        # --- PASO 2: Recolección Asíncrona NAtiva ---
         master_raw_data = collector.collect_all()
 
-        # --- PASO 3: Module Execution ---
+        # --- PASO 3: Ejecución de Módulos (1-6) ---
         print("[*] Executing Audit Modules...")
         
         print(" [D1] Auditing Asset Visibility & Inventory...")
@@ -52,14 +53,17 @@ def main():
         print(" [D4] Auditing Remediation & Response...")
         all_findings.extend(run_domain4(master_raw_data))
 
-        # --- PASO 4: Scoring Engine ---
-        print("[*] Calculating Platform Maturity Metrics...")
+        print(" [D5/6] Auditing Governance & Ecosystem Proxies...")
+        all_findings.extend(run_domain56(master_raw_data))
+
+        # --- PASO 4: Motor de Scoring ---
+        print("[*] Calculating Final Platform Maturity Metrics...")
         domain_scores = scoring_engine.calculate_domain_scores(all_findings)
         overall_score = scoring_engine.calculate_overall_score(domain_scores)
 
-        # --- PASO 5: Presentation ---
+        # --- PASO 5: Presentación Oficial ---
         print("\n" + "-"*60)
-        print(f"{'OFFICIAL MATURITY ASSESSMENT (v5.0.6)':^60}")
+        print(f"{'OFFICIAL MATURITY ASSESSMENT (v5.0.7)':^60}")
         print("-" * 60)
         
         dom_names = {
@@ -79,10 +83,10 @@ def main():
             elif d_score >= 2.5: status = "WARNING "
             else: status = "CRITICAL"
             
-            print(f" > {name:<40}: {d_score:^5.2f}/5.0 [{status}]")
+            print(f" > {name:<42}: {d_score:^5.2f}/5.0 [{status}]")
             
         print("-" * 60)
-        print(f" PLATFORM MATURITY SCORE: {overall_score:^5.2f}/5.0")
+        print(f" FINAL PLATFORM MATURITY SCORE: {overall_score:^5.2f}/5.0")
         print("-" * 60)
         
         exec_time = round(time.time() - start_time, 2)
