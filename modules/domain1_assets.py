@@ -1,6 +1,6 @@
 """
 PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.0.0
+VERSION: 5.0.6
 LAYER: Business / Modules
 DESCRIPTION: Generates findings for Domain 1 (Asset Visibility & Inventory).
 AUTHOR: Senior Software Architect
