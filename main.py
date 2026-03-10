@@ -1,8 +1,8 @@
 """
 PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.1.0
+VERSION: 5.1.1
 LAYER: Orchestration
-DESCRIPTION: Main entry point. Now integrates Strategic Context Engine.
+DESCRIPTION: Main entry point. Shadow IT Engine Integration.
 AUTHOR: Senior Software Architect
 """
 import time
@@ -11,37 +11,39 @@ from modules import domain1_assets, domain2_scans, domain3_risks, domain4_remedi
 from reports import export_engine
 
 def main():
-    print("============================================================")
+    print("="*60)
     print("               V5-TENABLE HEALTH CHECK SYSTEM               ")
-    print("                 Orchestrator V5.1.0 - PHASE 2              ")
-    print("============================================================")
+    print("           Orchestrator V5.1.1 - PHASE 2 (Shadow IT Engine) ")
+    print("="*60)
 
-    # Step 0: Load Strategic Context
+    # 1. Carga de contexto estratégico
     context = context_loader.load_context()
     context_loader.display_context_info(context)
 
-    # Step 1: Connect and Collect
+    # 2. Conexión y recolección
     conn = connection.TenableConnection()
     collector = data_collector.TenableDataCollector(conn)
     master_data = collector.collect_all()
-    
-    # Inject Context into Master Data for Modules
     master_data['context'] = context
 
-    # Step 2: Audit Domains
+    # 3. Auditoría de Dominios
     print("[*] Executing Strategic Audit Modules...")
     all_findings = []
-    all_findings.extend(domain1_assets.run_audit(master_data))
-    all_findings.extend(domain2_scans.run_audit(master_data))
-    all_findings.extend(domain3_risks.run_audit(master_data))
-    all_findings.extend(domain4_remediation.run_audit(master_data))
-    all_findings.extend(domain5_6_proxy.run_audit(master_data))
+    modules = [domain1_assets, domain2_scans, domain3_risks, domain4_remediation, domain5_6_proxy]
+    
+    for mod in modules:
+        try:
+            findings = mod.run_audit(master_data)
+            if findings:
+                all_findings.extend(findings)
+        except Exception as e:
+            print(f"[ERROR] Fail in {mod.__name__}: {e}")
 
-    # Step 3: Scoring & Reporting
+    # 4. Scoring y Reporte
     final_scores = scoring.calculate_maturity(all_findings)
     export_engine.generate_reports(all_findings, final_scores)
 
-    print("\n[SUCCESS] Phase 2 Strategic Health Check Completed.")
+    print("\n[DONE] Shadow IT Audit v5.1.1 completed successfully.")
 
 if __name__ == "__main__":
     main()

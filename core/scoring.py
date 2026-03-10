@@ -1,6 +1,6 @@
 """
 PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.1.0
+VERSION: 5.1.1
 LAYER: Core / Scoring
 DESCRIPTION: Maturity calculation engine. Supports override_score logic.
 AUTHOR: Senior Software Architect
