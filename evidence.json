@@ -1,0 +1,351 @@
+{
+    "users_total": 44,
+    "users_active": [
+        {
+            "name": "dgarcia.ctr@tenable.com",
+            "username": "dgarcia.ctr@tenable.com"
+        },
+        {
+            "name": "Jose Oporto",
+            "username": "joporto.ctr@tenable.com"
+        },
+        {
+            "name": "Alsenitd Rausseo",
+            "username": "arausseo@tenable.com"
+        },
+        {
+            "name": "QS-operator",
+            "username": "qs-operator@tenable.com"
+        },
+        {
+            "name": "lumin-admin-user",
+            "username": "lumin-admin-user@tenable.com"
+        },
+        {
+            "name": "ServiceNow Integrator",
+            "username": "servicenow.user@tenable.com"
+        },
+        {
+            "name": "SB-Oporto",
+            "username": "sboporto@tenable.com"
+        },
+        {
+            "name": "test",
+            "username": "test-qa@tenable.com"
+        },
+        {
+            "name": "Julian Meneses",
+            "username": "jmeneses@tenable.com"
+        },
+        {
+            "name": "Prueba Tag",
+            "username": "prueba.tag@tenable.com"
+        },
+        {
+            "name": "Scan Bridge JM-JO",
+            "username": "scanbridge_user_tio@tenable.com"
+        },
+        {
+            "name": "was user",
+            "username": "was.user@tenable.com"
+        },
+        {
+            "name": "1-0-24",
+            "username": "1-0-24@tenable.com"
+        },
+        {
+            "name": "Prueba1-0-24",
+            "username": "prueba1-0-24@tenable.com"
+        },
+        {
+            "name": "Alvaro Moreno",
+            "username": "amoreno.ctr@tenable.com"
+        },
+        {
+            "name": "amoreno test",
+            "username": "amorenotest@tenable.com"
+        },
+        {
+            "name": "testsc",
+            "username": "testc@tenable.com"
+        },
+        {
+            "name": "ajmmadmin1",
+            "username": "ajmmadmin1@tenable.com"
+        },
+        {
+            "name": "tmanager@tenable.com",
+            "username": "tmanager@tenable.com"
+        },
+        {
+            "name": "Daniel-RBAC-0",
+            "username": "daniel-rbac-0@tenable.com"
+        },
+        {
+            "name": "Daniel-RBAC-1",
+            "username": "daniel-rbac-1@tenable.com"
+        },
+        {
+            "name": "servicenow.filipe@tenable.com",
+            "username": "servicenow.filipe@tenable.com"
+        },
+        {
+            "name": "VMEnabled-only@tenable.com",
+            "username": "vmenabled-only@tenable.com"
+        },
+        {
+            "name": "Juan Safina",
+            "username": "jsafina.ctr@tenable.com"
+        },
+        {
+            "name": "Alejandra Oporto",
+            "username": "aoporto@tenable.com"
+        },
+        {
+            "name": "Andres Mora",
+            "username": "amora.ctr@tenable.com"
+        },
+        {
+            "name": "Nicolai Vogler",
+            "username": "nvogler.ctr@tenable.com"
+        },
+        {
+            "name": "Laboratorio NV",
+            "username": "laboratorio@tenable.com"
+        },
+        {
+            "name": "juan safina prueba Maples",
+            "username": "juan.safina@tenable.com"
+        },
+        {
+            "name": "Alvaro Moreno MPIV",
+            "username": "alvaro.moreno@tenable.com"
+        },
+        {
+            "name": "prueba aD ajm",
+            "username": "a.moreno@tenable.com"
+        },
+        {
+            "name": "patchmpiv@tenable.com",
+            "username": "patchmpiv@tenable.com"
+        },
+        {
+            "name": "Maples Test",
+            "username": "maplestest@tenable.com"
+        },
+        {
+            "name": "API_User",
+            "username": "api-user@tenable.com"
+        }
+    ],
+    "scanners": [
+        {
+            "name": "US Cloud Scanner",
+            "status": "on"
+        },
+        {
+            "name": "ip-10-0-0-30.ec2.internal",
+            "status": "off"
+        },
+        {
+            "name": "EU Frankfurt Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "7f83424c-f596-4a15-b1eb-ce675e34c2a3-1354d28e-f9ef-440c-b00e-fe1894826e01",
+            "status": "off"
+        },
+        {
+            "name": "cbc3a0bb-1d57-451c-9a89-1cdbb7108539-8b393251-ed3c-4ce7-a566-a0a27872265f",
+            "status": "off"
+        },
+        {
+            "name": "US East Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "AP Singapore Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "New",
+            "status": "off"
+        },
+        {
+            "name": "TenableCoreNNMTio",
+            "status": "off"
+        },
+        {
+            "name": "Laboratorio NV",
+            "status": "on"
+        },
+        {
+            "name": "Ireland Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "f6de0256-3e4f-4207-9316-e9f1c97311a2-dc00b074-63b2-42e8-8ba3-176d60c51a14",
+            "status": "off"
+        },
+        {
+            "name": "DESKTOP-E7G4N40",
+            "status": "off"
+        },
+        {
+            "name": "US West Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "was-scanner-AWS-5319",
+            "status": "off"
+        },
+        {
+            "name": "NNM-Heroinas",
+            "status": "off"
+        },
+        {
+            "name": "Test Scanner Group",
+            "status": "on"
+        },
+        {
+            "name": "NNM LASO",
+            "status": "off"
+        },
+        {
+            "name": "was-scanner-4825-Heroinas",
+            "status": "off"
+        },
+        {
+            "name": "TenableNessus-AzureNV",
+            "status": "off"
+        },
+        {
+            "name": "e35fc14a-9d6b-4c50-af5e-0dc08f54ccea-58c813d3-106a-4fb8-896e-f5455e4ab2ec",
+            "status": "off"
+        },
+        {
+            "name": "03e71316-f714-4f23-be9b-5917150a02eb-1e7c8e4a-f5bb-4fe0-a2b5-cc44c1b9fd26",
+            "status": "off"
+        },
+        {
+            "name": "AP Tokyo Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "e35fc14a-9d6b-4c50-af5e-0dc08f54ccea-ff2eafca-e2ba-4347-98b8-15c8481a351b",
+            "status": "off"
+        },
+        {
+            "name": "fb85f891-37c8-441e-837a-6cfaed69c473",
+            "status": "off"
+        },
+        {
+            "name": "EMEA Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "Prueba",
+            "status": "on"
+        },
+        {
+            "name": "Brazil Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "tenable-gfx-NS-t.io",
+            "status": "off"
+        },
+        {
+            "name": "bde317e5-54e5-4ed8-ac63-33763f2f54c4-1e6e93f2-b4b5-46cb-afab-5a1565c1c950",
+            "status": "off"
+        },
+        {
+            "name": "Sven Heroinas",
+            "status": "on"
+        },
+        {
+            "name": "CA Central Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "JUME-NNM",
+            "status": "off"
+        },
+        {
+            "name": "tenable-29mw6w0a",
+            "status": "off"
+        },
+        {
+            "name": "tenable-3n5mkcbq",
+            "status": "off"
+        },
+        {
+            "name": "V2 NNM Test",
+            "status": "off"
+        },
+        {
+            "name": "UK Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "AP Sydney Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "Nessus-T.io-GFx",
+            "status": "off"
+        },
+        {
+            "name": "955d0053-9c83-42aa-ba57-752f98fcf20e-f5d62350-afcc-425d-b093-2a4fddb7cf36",
+            "status": "off"
+        },
+        {
+            "name": "NNM test Daniel",
+            "status": "off"
+        },
+        {
+            "name": "UK London Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "Headquarters-NV",
+            "status": "on"
+        },
+        {
+            "name": "APAC Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "NS Tsc-Tio",
+            "status": "off"
+        },
+        {
+            "name": "EU Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "mpiv-NS",
+            "status": "off"
+        },
+        {
+            "name": "Test",
+            "status": "on"
+        },
+        {
+            "name": "India Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "UAE Cloud Scanners",
+            "status": "on"
+        },
+        {
+            "name": "mpiv-WAS",
+            "status": "off"
+        },
+        {
+            "name": "ip-172-31-24-65",
+            "status": "off"
+        }
+    ]
+}

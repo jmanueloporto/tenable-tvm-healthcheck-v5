@@ -1,0 +1,45 @@
+================================================================================
+                         DETAILED MATURITY AUDIT REPORT                         
+                            Timestamp: 20260310_1607                            
+================================================================================
+
+GLOBAL MATURITY SCORE: 2.54 / 5.0
+
+DOMAIN SUMMARY:
+ [1] Asset Visibility & Inventory                 : 1.75/5.0
+ [2] Scanning Operations & Data Quality           : 2.00/5.0
+ [3] Risk Prioritization & Analysis               : 1.00/5.0
+ [4] Remediation & Response                       : 5.00/5.0
+ [5] Program Governance & Operations              : 1.67/5.0
+ [6] Ecosystem Integration & Security Posture     : 5.00/5.0
+
+DETAILED EVIDENCE & FINDINGS:
+--------------------------------------------------------------------------------
+FINDING: Stale Asset Inventory (Domain 1)
+EVIDENCE: N/A
+RECS: Decommission or rescan stale assets listed in evidence
+----------------------------------------
+FINDING: Missing Cloud Connectors (Domain 1)
+EVIDENCE: N/A
+RECS: Configure AWS/Azure/GCP connectors for dynamic asset discovery
+----------------------------------------
+FINDING: Traditional Scanners Offline (Domain 2)
+EVIDENCE: N/A
+RECS: Check connectivity for Nessus Scanners, Verify scanner services
+----------------------------------------
+FINDING: Insufficient Data for Risk Analysis (Domain 3)
+EVIDENCE: N/A
+RECS: Ensure Step 5 of Data Collector (Vuln Export) is working
+----------------------------------------
+FINDING: Consolidated Brute Force Alert (Domain 5)
+EVIDENCE: joporto.ctr@tenable.com, jmeneses@tenable.com, amoreno.ctr@tenable.com, lsanchez.ctr@tenable.com, jsafina.ctr@tenable.com, nvogler.ctr@tenable.com, alvaro.moreno@tenable.com
+RECS: Lock listed accounts, Force password reset, Review source logs
+----------------------------------------
+FINDING: Bulk Stale Accounts (Zombies) (Domain 5)
+EVIDENCE: dgarcia.ctr@tenable.com, joporto@tenable.com, joporto.ctr@tenable.com, arausseo@tenable.com, qs-operator@tenable.com, lumin-admin-user@tenable.com, servicenow.user@tenable.com, sboporto@tenable.com, test-qa@tenable.com, jchan@tenable.com, cbecerra@tenable.com, jmeneses@tenable.com, prueba.tag@tenable.com, scanbridge_user_tio@tenable.com, was.user@tenable.com, 1-0-24@tenable.com, prueba1-0-24@tenable.com, amoreno.ctr@tenable.com, amorenotest@tenable.com, testc@tenable.com, mcanales.ctr@tenable.com, lsanchez.ctr@tenable.com, ajmmscanadmin@tenable.com, ajmmadmin1@tenable.com, tmanager@tenable.com, daniel-rbac-0@tenable.com, daniel-rbac-1@tenable.com, ali.rizvi@tenable.com, filipe.bessa@tenable.com, servicenow.filipe@tenable.com, dquintero.ctr@tenable.com, vmenabled-only@tenable.com, jsafina.ctr@tenable.com, aoporto@tenable.com, amora.ctr@tenable.com, nvogler.ctr@tenable.com, laboratorio@tenable.com, juan.safina@tenable.com, alvaro.moreno@tenable.com, a.moreno@tenable.com, patchmpiv@tenable.com, maplestest@tenable.com, dummyadmin@tenable.com, api-user@tenable.com
+RECS: Deprovision listed users, Implement 90-day inactivity policy
+----------------------------------------
+FINDING: Non-Federated Identity Risk (Local Users) (Domain 5)
+EVIDENCE: dgarcia.ctr@tenable.com, joporto@tenable.com, joporto.ctr@tenable.com, arausseo@tenable.com, qs-operator@tenable.com, lumin-admin-user@tenable.com, servicenow.user@tenable.com, sboporto@tenable.com, test-qa@tenable.com, jchan@tenable.com, cbecerra@tenable.com, jmeneses@tenable.com, prueba.tag@tenable.com, scanbridge_user_tio@tenable.com, was.user@tenable.com, 1-0-24@tenable.com, prueba1-0-24@tenable.com, amoreno.ctr@tenable.com, amorenotest@tenable.com, testc@tenable.com, mcanales.ctr@tenable.com, lsanchez.ctr@tenable.com, ajmmscanadmin@tenable.com, ajmmadmin1@tenable.com, tmanager@tenable.com, daniel-rbac-0@tenable.com, daniel-rbac-1@tenable.com, ali.rizvi@tenable.com, filipe.bessa@tenable.com, servicenow.filipe@tenable.com, dquintero.ctr@tenable.com, vmenabled-only@tenable.com, jsafina.ctr@tenable.com, aoporto@tenable.com, amora.ctr@tenable.com, nvogler.ctr@tenable.com, laboratorio@tenable.com, juan.safina@tenable.com, alvaro.moreno@tenable.com, a.moreno@tenable.com, patchmpiv@tenable.com, maplestest@tenable.com, dummyadmin@tenable.com, api-user@tenable.com
+RECS: Migrate listed users to SAML/SSO, Enforce MFA for locals
+----------------------------------------

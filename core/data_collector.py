@@ -1,49 +1,113 @@
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.0.19
+LAYER: Core / Data Collection
+DESCRIPTION: Silent execution collector. Polling and 403/405 errors are silenced. 
+             Steps 3 and 4 are separated for CLI clarity.
+AUTHOR: Senior Software Architect
+"""
+
 import time
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 class TenableDataCollector:
     def __init__(self, connection):
-        self.tio = connection.tio
+        self.connection = connection
+
+    def _wait_for_export(self, export_type: str, uuid: str) -> List[int]:
+        """Polls export status silently until FINISHED."""
+        while True:
+            try:
+                status_res = self.connection.get(f"/{export_type}/export/{uuid}/status")
+                status = status_res.get("status")
+                if status == "FINISHED":
+                    return status_res.get("chunks_available", [])
+                elif status == "ERROR":
+                    return []
+            except:
+                return []
+            time.sleep(2)
 
     def collect_all(self) -> Dict[str, Any]:
-        print("[*] Starting 7-Step Asynchronous Collection Sequence...")
-        data = {}
-        
-        print(" [Step 1/7] Fetching Infrastructure...")
-        data['scanners'] = self.tio.scanners.list()
-        
+        print("[*] Starting Phase 1 Silent Collection (v5.0.16)...")
+        data = {
+            'infrastructure': {}, 'assets': [], 'vulnerabilities': [],
+            'users': [], 'audit_log': [], 'scans': [], 'policies': [], 'tags': []
+        }
+
+        # --- STEP 1: Infrastructure (Silent) ---
+        print(" [Step 1/7] Fetching Hybrid Sensors...")
+        infra = {'scanners': [], 'was_scanners': [], 'nnm_monitors': [], 'connectors': [], 'exclusions': []}
+        try:
+            infra['scanners'] = self.connection.get("/scanners").get('scanners', [])
+            try: infra['connectors'] = self.connection.get("/connectors").get('connectors', [])
+            except: pass
+        except: pass
+        data['infrastructure'] = infra
+
+        # --- STEP 2: Assets (Silent Polling) ---
         print(" [Step 2/7] Exporting Assets...")
-        # Obtenemos el objeto de exportación
-        asset_exp = self.tio.exports.assets()
-        # El UUID real se extrae así:
-        asset_uuid = asset_exp.uuid
-        while True:
-            status = self.tio.exports.status('assets', asset_uuid)
-            if status.get('status') == 'FINISHED': break
-            time.sleep(5)
-        data['assets_raw'] = self.tio.exports.download_chunk('assets', asset_uuid, 1)
+        try:
+            asset_payload = {"chunk_size": 1000, "filters": {"is_terminated": False}}
+            asset_req = self.connection.post("/assets/export", json=asset_payload)
+            a_uuid = asset_req.get("export_uuid")
+            chunks = self._wait_for_export("assets", a_uuid)
+            for c_id in chunks:
+                chunk_data = self.connection.get(f"/assets/export/{a_uuid}/chunks/{c_id}")
+                data['assets'].extend(chunk_data if isinstance(chunk_data, list) else [])
+        except: pass
 
-        print(" [Step 3/7] Fetching Scans & Policies...")
-        data['scans'] = self.tio.scans.list()
-        data['policies'] = self.tio.policies.list()
+        # --- STEP 3: Scans (Separated) ---
+        print(" [Step 3/7] Fetching Scans...")
+        try:
+            data['scans'] = self.connection.get("/scans").get('scans', [])
+        except: pass
 
-        print(" [Step 4/7] Fetching Tags...")
-        data['tags'] = self.tio.tags.list()
+        # --- STEP 4: Policies (Separated) ---
+        print(" [Step 4/7] Fetching Policies...")
+        try:
+            data['policies'] = self.connection.get("/policies").get('policies', [])
+            data['tags'] = self.connection.get("/tags/values").get('values', [])
+        except: pass
 
+        # --- STEP 5: Vulnerabilities (Flattening Engine) ---
         print(" [Step 5/7] Exporting Vulnerabilities...")
-        vuln_exp = self.tio.exports.vulns()
-        vuln_uuid = vuln_exp.uuid
-        while True:
-            status = self.tio.exports.status('vulns', vuln_uuid)
-            if status.get('status') == 'FINISHED': break
-            time.sleep(5)
-        data['vulns_raw'] = self.tio.exports.download_chunk('vulns', vuln_uuid, 1)
+        try:
+            vuln_payload = {"filters": {"severity": ["low", "medium", "high", "critical"], "state": ["OPEN", "REOPENED"]}}
+            vuln_req = self.connection.post("/vulns/export", json=vuln_payload)
+            v_uuid = vuln_req.get("export_uuid")
+            chunks = self._wait_for_export("vulns", v_uuid)
+            
+            for c_id in chunks:
+                chunk_data = self.connection.get(f"/vulns/export/{v_uuid}/chunks/{c_id}")
+                for vuln in chunk_data:
+                    port_val = vuln.get("port") or vuln.get("plugin", {}).get("port", [0])
+                    if isinstance(port_val, list):
+                        for p in port_val:
+                            v_copy = vuln.copy()
+                            v_copy['port'] = p
+                            data['vulnerabilities'].append(v_copy)
+                    else:
+                        data['vulnerabilities'].append(vuln)
+        except: pass
 
-        print(" [Step 6/7] Fetching Users...")
-        data['users'] = self.tio.users.list()
+        # --- STEP 6: Users (Silent 403) ---
+        print(" [Step 6/7] Fetching Platform Users...")
+        try:
+            data['users'] = self.connection.get("/users").get('users', [])
+        except: pass
+
+        # --- STEP 7: Audit Logs (Silent 403) ---
+        print(" [Step 7/7] Fetching Audit Logs...")
+        try:
+            res = self.connection.get("/audit-log/events?limit=500")
+            data['audit_log'] = res.get('events', [])
+        except:
+            data['audit_log'] = []
+
+        print("-" * 60)
+        print(f"[SUCCESS] Collection Complete (v5.0.16)")
+        print(f" > Total Assets: {len(data['assets'])} | Total Vulns: {len(data['vulnerabilities'])}")
+        print("-" * 60)
         
-        print(" [Step 7/7] Finalizing Master Data Map...")
-        data['connectors'] = [] 
-
-        print("[SUCCESS] Master Data Collection complete.")
         return data

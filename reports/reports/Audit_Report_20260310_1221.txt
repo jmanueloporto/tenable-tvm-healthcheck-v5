@@ -1,0 +1,77 @@
+============================================================
+       TENABLE VULNERABILITY MANAGEMENT HEALTH CHECK        
+          Forensic Evidence Report - 20260310_1221          
+============================================================
+
+OVERALL PLATFORM MATURITY SCORE: 2.99 / 5.0
+
+DOMAIN SCORES:
+ - Asset Visibility & Inventory: 5.00/5.0
+ - Scanning Operations & Data Quality: 2.00/5.0
+ - Risk Prioritization & Analysis: 3.00/5.0
+ - Remediation & Response: 2.00/5.0
+ - Program Governance & Operations: 1.22/5.0
+ - Ecosystem Integration & Security Posture: 5.00/5.0
+
+DETAILED FINDINGS:
+------------------------------------------------------------
+TITLE: Traditional Scanners Offline
+DOMAIN: Scanning Operations & Data Quality
+SCORE IMPACT: 2.0
+RECOMMENDATION: Check connectivity for Nessus Scanners, Verify scanner services
+------------------------------
+TITLE: Low Adoption of Risk-Based Prioritization (VPR)
+DOMAIN: Risk Prioritization & Analysis
+SCORE IMPACT: 3.0
+RECOMMENDATION: Enable Tenable VPR scoring, Prioritize assets using VPR > 9.0 instead of CVSS 10
+------------------------------
+TITLE: Low Remediation Coverage
+DOMAIN: Remediation & Response
+SCORE IMPACT: 2.0
+RECOMMENDATION: Focus patching efforts on Critical/High backlogs
+------------------------------
+TITLE: Potential Brute Force Detected
+DOMAIN: Program Governance & Operations
+SCORE IMPACT: 1.0
+RECOMMENDATION: Lock suspicious account, Investigate source IP in Audit Logs
+------------------------------
+TITLE: Potential Brute Force Detected
+DOMAIN: Program Governance & Operations
+SCORE IMPACT: 1.0
+RECOMMENDATION: Lock suspicious account, Investigate source IP in Audit Logs
+------------------------------
+TITLE: Potential Brute Force Detected
+DOMAIN: Program Governance & Operations
+SCORE IMPACT: 1.0
+RECOMMENDATION: Lock suspicious account, Investigate source IP in Audit Logs
+------------------------------
+TITLE: Potential Brute Force Detected
+DOMAIN: Program Governance & Operations
+SCORE IMPACT: 1.0
+RECOMMENDATION: Lock suspicious account, Investigate source IP in Audit Logs
+------------------------------
+TITLE: Potential Brute Force Detected
+DOMAIN: Program Governance & Operations
+SCORE IMPACT: 1.0
+RECOMMENDATION: Lock suspicious account, Investigate source IP in Audit Logs
+------------------------------
+TITLE: Potential Brute Force Detected
+DOMAIN: Program Governance & Operations
+SCORE IMPACT: 1.0
+RECOMMENDATION: Lock suspicious account, Investigate source IP in Audit Logs
+------------------------------
+TITLE: Potential Brute Force Detected
+DOMAIN: Program Governance & Operations
+SCORE IMPACT: 1.0
+RECOMMENDATION: Lock suspicious account, Investigate source IP in Audit Logs
+------------------------------
+TITLE: High Ratio of Stale Accounts (Zombies)
+DOMAIN: Program Governance & Operations
+SCORE IMPACT: 1.0
+RECOMMENDATION: Implement automated user deprovisioning, Review inactive users monthly
+------------------------------
+TITLE: Weak Identity Federation (Missing SSO/SAML)
+DOMAIN: Program Governance & Operations
+SCORE IMPACT: 3.0
+RECOMMENDATION: Migrate local users to SAML/SSO, Enforce MFA for remaining local accounts
+------------------------------

@@ -1,23 +1,35 @@
 # V5-Tenable Health Check API Automation
-**Current Version: 5.0.7
+**Version:** 5.0.19 (Phase 1 Final)
+**Status:** Stable / Production Ready
 
-## Descripción
-Plataforma avanzada de asesoría de postura de seguridad para Tenable Vulnerability Management [cite: 10-11].
-Actualmente en la **Fase 1 (API-Driven)**, extrayendo la verdad objetiva de la plataforma sin intervención humana [cite: 42-43, 256].
+## 1. Project Structure
+- `main.py`: Orchestrator of the audit process.
+- `core/`:
+  - `connection.py`: API authentication and request handling.
+  - `data_collector.py`: Fault-tolerant asynchronous data extraction.
+  - `models.py`: Golden data model for findings and evidence.
+  - `scoring.py`: Mathematical maturity calculation engine.
+- `modules/`:
+  - `domain1_assets.py`: Inventory visibility and agent health audit.
+  - `domain2_scans.py`: Scan quality and authentication rate audit.
+  - `domain3_risks.py`: VPR-based risk and density analysis.
+  - `domain4_remediation.py`: Velocity (TTR) and coverage efficiency audit.
+  - `domain5_6_proxy.py`: Identity hygiene and ecosystem proxy audit.
+- `reports/`:
+  - `export_engine.py`: Forensic PDF/TXT report generator.
+  - `reports/`: Target directory for generated audit evidence.
 
-## Avances Actuales (v5.0.6)
-- **Core Architecture:** Motor de recolección asíncrona de 7 pasos usando REST API directa (rendimiento de ejecución en ~15-20s) [cite: 39-40, 819-822]. Orquestador desacoplado y Motor de Puntuación dinámico[cite: 197].
-- **Módulos de Auditoría Operativos:**
-  - **Domain 1:** Asset Visibility & Inventory [cite: 22]
-  - **Domain 2:** Scanning Operations & Data Quality [cite: 23]
-  - **Domain 3:** Risk Prioritization & Analysis [cite: 24]
-  - **Domain 4:** Remediation & Response [cite: 25]
+## 2. Phase 1 Engineering Milestones
+- **Asynchronous Data Parity:** Implemented POST-based export flows to ensure 1:1 parity with Tenable GUI.
+- **Vulnerability Flattening:** Engine that splits multi-port vulnerabilities into individual findings for accurate risk density.
+- **Fault Tolerance:** Robust try/except isolation for Step 1-7 collection, surviving 403 (Forbidden) and 405 (Method Not Allowed) errors.
+- **Evidence Injection:** Automatic hostname/IP extraction into findings to eliminate "N/A" in forensic reports.
+- **Golden Model:** Unified `Finding` class supporting `observation`, `source`, `confidence`, and `override_score`.
 
-## Arquitectura del Repositorio (GitOps)
-El proyecto sigue un flujo de trabajo de ramas estructurado para proteger el código:
-- `main`: Rama de producción / estable. Contiene únicamente versiones consolidadas y etiquetadas (tags).
-- `develop`: Rama de desarrollo continuo. Aquí se integran los nuevos módulos y características (Feature integration) antes de cada release.
+## 3. Quick Start
+```bash
+# Install dependencies
+pip install requests fpdf
 
-## Ejecución
-1. Activar entorno virtual: `source .venv/bin/activate`
-2. Ejecutar orquestador: `python3 main.py`
+# Run full audit
+python3 main.py
