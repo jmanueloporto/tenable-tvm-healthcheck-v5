@@ -1,6 +1,6 @@
 """
 PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.0.19
+VERSION: 5.1.0
 LAYER: Business / Modules
 DESCRIPTION: Generates findings for Domain 4 (Compliance & Policy Adherence).
 AUTHOR: Senior Software Architect

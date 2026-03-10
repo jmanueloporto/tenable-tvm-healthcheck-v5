@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "version": "5.1.0",
+    "last_updated": "2026-03-10",
+    "description": "Manual context for Strategic Enrichment"
+  },
+  "context": {
+    "expected_assets": 100,
+    "maintenance_windows": true,
+    "internal_sla_critical": 15,
+    "exception_process_active": false,
+    "staff_capacity": 2
+  }
+}
