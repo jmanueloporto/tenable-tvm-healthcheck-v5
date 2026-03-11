@@ -1,0 +1,1175 @@
+============================================================
+ FILE: ./tools/verify_data.py
+============================================================
+import os
+import json
+import requests
+from dotenv import load_dotenv
+
+def get_evidence():
+    print("[*] Iniciando extracción de evidencia forense...")
+    load_dotenv()
+    
+    # Configurar conexión usando las variables de tu .env
+    access_key = os.getenv('TENABLE_ACCESS_KEY')
+    secret_key = os.getenv('TENABLE_SECRET_KEY')
+    url = os.getenv('TENABLE_URL', 'https://cloud.tenable.com')
+    
+    headers = {
+        "accept": "application/json",
+        "X-ApiKeys": f"accessKey={access_key};secretKey={secret_key}"
+    }
+    
+    evidence = {}
+
+    try:
+        # 1. Validar Usuarios (Para Dominios 5 y 6)
+        print(" -> Consultando usuarios...")
+        user_resp = requests.get(f"{url}/users", headers=headers)
+        if user_resp.status_code == 200:
+            users = user_resp.json().get('users', [])
+            evidence['users_total'] = len(users)
+            evidence['users_active'] = [{"name": u.get('name'), "username": u.get('username')} 
+                                        for u in users if u.get('enabled')]
+        
+        # 2. Validar Escáneres (Para Dominio 2)
+        print(" -> Consultando escáneres...")
+        scan_resp = requests.get(f"{url}/scanners", headers=headers)
+        if scan_resp.status_code == 200:
+            scanners = scan_resp.json().get('scanners', [])
+            evidence['scanners'] = [{"name": s.get('name'), "status": s.get('status')} for s in scanners]
+
+        # Guardar los datos en un archivo JSON
+        with open("evidence.json", "w") as f:
+            json.dump(evidence, f, indent=4)
+            
+        print("\n[SUCCESS] Datos reales extraídos y guardados en 'evidence.json'")
+        
+    except Exception as e:
+        print(f"[ERROR] Falló la extracción: {str(e)}")
+
+if __name__ == "__main__":
+    get_evidence()
+
+
+
+============================================================
+ FILE: ./modules/domain4_compliance.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Business / Modules
+DESCRIPTION: Generates findings for Domain 4 (Compliance & Policy Adherence).
+AUTHOR: Senior Software Architect
+"""
+
+from core.models import Finding
+from typing import List, Dict, Any
+
+def run_audit(master_data: Dict[str, Any]) -> List[Finding]:
+    """
+    Analyzes configuration audits, benchmarking and policy usage.
+    """
+    all_findings: List[Finding] = []
+    domain_id = 4
+    source_tag = "api"
+
+    try:
+        policies = master_data.get("policies", [])
+        if not isinstance(policies, list):
+            policies = []
+
+        # --- Finding 4.1: Compliance Scan Adoption ---
+        # Buscamos políticas que incluyan "audit" o "compliance" o "cis"
+        comp_policies = [p for p in policies if any(x in p.get("name", "").lower() for x in ["audit", "compliance", "cis", "pci"])]
+        
+        if not comp_policies:
+            all_findings.append(Finding(
+                title="Absence of Compliance Benchmarking",
+                domain=domain_id, source=source_tag,
+                metrics={"compliance_policies_found": 0},
+                score=1.5, confidence="High",
+                recommendations=["Implement CIS Benchmarks scans", "Audit server hardening configurations"]
+            ))
+
+        # --- Finding 4.2: Policy Complexity/Health ---
+        # Si tienes demasiadas políticas (> 50), suele haber un desorden administrativo
+        if len(policies) > 50:
+            all_findings.append(Finding(
+                title="Scan Policy Sprawl",
+                domain=domain_id, source=source_tag,
+                metrics={"policy_count": len(policies)},
+                score=3.0, confidence="Medium",
+                recommendations=["Consolidate scan policies", "Remove unused or legacy policy templates"]
+            ))
+
+    except Exception as e:
+        all_findings.append(Finding(
+            title="Module Error: Domain 4",
+            domain=domain_id, source="system",
+            metrics={"exception": str(e)},
+            score=1.0, confidence="High",
+            recommendations=["Check master_data['policies'] structure"]
+        ))
+
+    return all_findings
+
+
+
+============================================================
+ FILE: ./modules/domain4_remediation.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Business / Modules
+DESCRIPTION: Generates findings for Domain 4 (Remediation & Response).
+             Analyzes MTTR, Fix Rates, and Effort Alignment.
+AUTHOR: Senior Software Architect
+"""
+
+from core.models import Finding
+from typing import List, Dict, Any
+from datetime import datetime
+
+def run_audit(master_data: Dict[str, Any]) -> List[Finding]:
+    """
+    Evaluates remediation velocity, coverage, and risk-based prioritization.
+    """
+    all_findings: List[Finding] = []
+    domain_id = 4
+    source_tag = "api"
+
+    try:
+        vulns = master_data.get("vulns_raw", [])
+        if not isinstance(vulns, list) or not vulns:
+            return []
+
+        # Categorización de datos para análisis
+        fixed_vulns = [v for v in vulns if v.get("state") == "fixed"]
+        open_vulns = [v for v in vulns if v.get("state") in ["open", "reopened"]]
+        
+        # --- Finding 4.1: Remediation Velocity (MTTR) ---
+        ttr_days = []
+        for v in [fv for fv in fixed_vulns if fv.get("severity") == "critical"]:
+            try:
+                # Conversión de timestamps ISO a objetos datetime
+                first = datetime.fromisoformat(v['first_found'].replace('Z', '+00:00'))
+                last = datetime.fromisoformat(v['last_fixed'].replace('Z', '+00:00'))
+                ttr_days.append((last - first).days)
+            except (KeyError, ValueError):
+                continue
+
+        if ttr_days:
+            avg_ttr = sum(ttr_days) / len(ttr_days)
+            if avg_ttr > 30:
+                score = 1.0 if avg_ttr > 60 else 2.0
+                all_findings.append(Finding(
+                    title="Remediation SLA Breach (MTTR)",
+                    domain=domain_id, source=source_tag,
+                    metrics={"avg_ttr_critical_days": round(avg_ttr, 1)},
+                    score=score, confidence="High",
+                    recommendations=[f"Reduce Critical MTTR to < 30 days. Current: {round(avg_ttr, 1)}"]
+                ))
+
+        # --- Finding 4.2: Remediation Coverage (Fix Rate) ---
+        crit_total = len([v for v in vulns if v.get("severity") == "critical"])
+        crit_fixed = len([v for v in fixed_vulns if v.get("severity") == "critical"])
+        high_total = len([v for v in vulns if v.get("severity") == "high"])
+        high_fixed = len([v for v in fixed_vulns if v.get("severity") == "high"])
+
+        fix_rate_crit = (crit_fixed / crit_total * 100) if crit_total > 0 else 100
+        fix_rate_high = (high_fixed / high_total * 100) if high_total > 0 else 100
+
+        if fix_rate_crit < 70 or fix_rate_high < 50:
+            all_findings.append(Finding(
+                title="Low Remediation Coverage",
+                domain=domain_id, source=source_tag,
+                metrics={"crit_fix_rate": f"{round(fix_rate_crit,1)}%", "high_fix_rate": f"{round(fix_rate_high,1)}%"},
+                score=2.0, confidence="High",
+                recommendations=["Focus patching efforts on Critical/High backlogs"]
+            ))
+
+        # --- Finding 4.3: Effort Misalignment (VPR vs Fix) ---
+        low_vpr_fixed = len([v for v in fixed_vulns if float(v.get("vpr_score", 0) or 0) < 4.0])
+        high_vpr_fixed = len([v for v in fixed_vulns if float(v.get("vpr_score", 0) or 0) >= 7.0])
+
+        if low_vpr_fixed > high_vpr_fixed and high_vpr_fixed > 0:
+            all_findings.append(Finding(
+                title="Inefficient Remediation Prioritization",
+                domain=domain_id, source=source_tag,
+                metrics={"low_vpr_fixed": low_vpr_fixed, "high_vpr_fixed": high_vpr_fixed},
+                score=2.0, confidence="Medium",
+                recommendations=["Redirect patching teams to address High VPR vulnerabilities first"]
+            ))
+
+    except Exception as e:
+        # Resiliencia Estricta v5.0.6
+        all_findings.append(Finding(
+            title="Module 4 Error",
+            domain=domain_id, source="system",
+            metrics={"exception": str(e)},
+            score=1.0, confidence="High",
+            recommendations=["Review API data structure and date formats in domain4_remediation.py"]
+        ))
+
+    return all_findings
+
+
+
+============================================================
+ FILE: ./modules/txt_reporter.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Presentation / Reporter
+DESCRIPTION: Decoupled logic for generating human-readable TXT reports.
+AUTHOR: Senior Software Architect
+"""
+
+from datetime import datetime
+from typing import Dict, Any
+
+class TXTReporter:
+    """Handles visual formatting and file generation."""
+
+    def generate(self, data: Dict[str, Any]) -> str:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filepath = f"reports/health_report_{timestamp}.txt"
+        
+        try:
+            with open(filepath, "w") as f:
+                f.write("="*60 + "\n")
+                f.write(f"{'TENABLE HEALTH CHECK REPORT V5.0.0':^60}\n")
+                f.write(f"{f'Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}':^60}\n")
+                f.write("="*60 + "\n\n")
+
+                f.write("[1] METRICS OVERVIEW\n")
+                f.write("-" * 20 + "\n")
+                for key, val in data["metrics"].items():
+                    f.write(f" > {key.replace('_', ' ').title()}: {val}\n")
+
+                f.write("\n[2] AUDIT FINDINGS\n")
+                f.write("-" * 20 + "\n")
+                if not data["findings"]:
+                    f.write("Status: No issues detected.\n")
+                else:
+                    for issue in data["findings"]:
+                        f.write(f"[{issue['severity']}] {issue['module']}: {issue['description']}\n")
+            
+            return filepath
+        except Exception as e:
+            return f"Error: {str(e)}"
+
+
+
+============================================================
+ FILE: ./modules/domain1_assets.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Business / Modules
+DESCRIPTION: Re-engineered Domain 1 (Asset Visibility) with detailed evidence injection.
+AUTHOR: Senior Software Architect
+"""
+
+from core.models import Finding
+from typing import List, Dict, Any
+from datetime import datetime, timezone
+
+def run_audit(master_data: Dict[str, Any]) -> List[Finding]:
+    all_findings: List[Finding] = []
+    domain_id = 1
+    source_tag = "api"
+    base_score = 5.0
+    now = datetime.now(timezone.utc)
+
+    try:
+        assets = master_data.get('assets', [])
+        infra = master_data.get('infrastructure', {})
+        connectors = infra.get('connectors', [])
+        
+        if not assets:
+            return [Finding(title="Zero Assets Discovered", domain=domain_id, score=1.0, observation="No assets returned by asynchronous export API.", recommendations=["Check network scan ranges"])]
+
+        total_assets = len(assets)
+        stale = []
+        agents_count = 0
+        tagged_count = 0
+        custom_acr_count = 0
+
+        for a in assets:
+            # 1.1 Stale Assets (> 90 días)
+            last_seen_str = a.get('last_authenticated_scan_date') or a.get('last_scan_time')
+            is_stale = True
+            if last_seen_str:
+                try:
+                    dt = datetime.fromisoformat(last_seen_str.replace('Z', '+00:00'))
+                    if (now - dt).days <= 90:
+                        is_stale = False
+                except: pass
+            if is_stale: stale.append(a)
+
+            # 1.2 Agent Count
+            if a.get('has_agent') is True: agents_count += 1
+
+            # 1.4 Tagging & ACR
+            if a.get('tags'): tagged_count += 1
+            if a.get('acr_score', 7) != 7: custom_acr_count += 1
+
+        # --- Evaluación de Hallazgos ---
+
+        # Finding 1.1: Stale Assets
+        if (len(stale) / total_assets) > 0.15:
+            base_score -= 1.0
+            evidence = f"Stale assets ({len(stale)}): " + ", ".join([str(a.get('name', a.get('ipv4', 'Unknown'))) for a in stale][:10])
+            all_findings.append(Finding(title="Stale Asset Inventory", domain=domain_id, score=1.0, observation=evidence, recommendations=["Decommission or rescan stale assets"]))
+
+        # Finding 1.2: Agent Deployment
+        agent_ratio = agents_count / total_assets
+        if agent_ratio < 0.10:
+            base_score -= 0.5
+            evidence = f"Only {agents_count} out of {total_assets} assets have agents deployed."
+            all_findings.append(Finding(title="Agent Deployment Gap", domain=domain_id, score=2.0, observation=evidence, recommendations=["Deploy Nessus Agents for deeper visibility"]))
+
+        # Finding 1.4: Tagging & ACR
+        if (tagged_count / total_assets) < 0.50 or custom_acr_count == 0:
+            base_score -= 1.0
+            evidence = f"Tagged assets: {tagged_count}/{total_assets}. Assets with custom ACR: {custom_acr_count}/{total_assets}."
+            all_findings.append(Finding(title="Lack of Asset Classification", domain=domain_id, score=1.0, observation=evidence, recommendations=["Implement Tagging and tune ACR scores"]))
+
+        # Finding 1.5: Cloud Connectors
+        if not connectors:
+            base_score -= 0.5
+            evidence = "No Cloud Connectors detected or API returned 405 (Method Not Allowed)."
+            all_findings.append(Finding(title="Missing Cloud Connectors", domain=domain_id, score=2.5, observation=evidence, recommendations=["Configure AWS/Azure/GCP connectors"]))
+
+    except Exception as e:
+        base_score = 1.0
+        all_findings.append(Finding(title="Domain 1 Audit Error", domain=domain_id, score=1.0, observation=str(e)))
+
+    return all_findings
+
+
+
+============================================================
+ FILE: ./modules/__init__.py
+============================================================
+
+
+
+============================================================
+ FILE: ./modules/domain5_reporting.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Business / Modules
+DESCRIPTION: Generates findings for Domain 5 (Reporting & Hygiene).
+AUTHOR: Senior Software Architect
+"""
+
+from core.models import Finding
+from typing import List, Dict, Any
+
+def run_audit(master_data: Dict[str, Any]) -> List[Finding]:
+    all_findings: List[Finding] = []
+    domain_id = 5
+    source_tag = "api"
+
+    try:
+        users = master_data.get("users", [])
+        
+        # --- Finding 5.1: User Hygiene (Inactive Users) ---
+        # Si hay usuarios que nunca se han logueado o no tienen MFA (simulado según metadata)
+        if len(users) > 10:
+            all_findings.append(Finding(
+                title="Excessive Administrative Users",
+                domain=domain_id, source=source_tag,
+                metrics={"user_count": len(users)},
+                score=3.0, confidence="Medium",
+                recommendations=["Review user roles", "Implement Least Privilege principle"]
+            ))
+
+    except Exception as e:
+        all_findings.append(Finding(
+            title="Module Error: Domain 5",
+            domain=domain_id, source="system",
+            metrics={"exception": str(e)},
+            score=1.0, confidence="High",
+            recommendations=["Verify user list permissions"]
+        ))
+
+    return all_findings
+
+
+
+============================================================
+ FILE: ./modules/domain2_scans.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Business / Modules
+DESCRIPTION: Re-engineered Domain 2 (Scanning Operations) with scan quality metrics.
+AUTHOR: Senior Software Architect
+"""
+
+from core.models import Finding
+from typing import List, Dict, Any
+from datetime import datetime, timezone
+
+def run_audit(master_data: Dict[str, Any]) -> List[Finding]:
+    all_findings: List[Finding] = []
+    domain_id = 2
+    source_tag = "api"
+    base_score = 5.0
+    now = datetime.now(timezone.utc)
+
+    try:
+        assets = master_data.get('assets', [])
+        policies = master_data.get('infrastructure', {}).get('policies', [])
+        
+        if not assets: return []
+
+        total_assets = len(assets)
+        auth_count = 0
+        recent_gaps = []
+
+        for a in assets:
+            # 2.1 Auth Rate (Agent or Authenticated Date)
+            last_auth_str = a.get('last_authenticated_scan_date')
+            if a.get('has_agent') is True or last_auth_str:
+                auth_count += 1
+
+            # 2.2 Scan Recency (30 días)
+            last_seen_str = a.get('last_scan_time')
+            is_recent = False
+            if last_seen_str:
+                try:
+                    dt = datetime.fromisoformat(last_seen_str.replace('Z', '+00:00'))
+                    if (now - dt).days <= 30:
+                        is_recent = True
+                except: pass
+            if not is_recent: recent_gaps.append(a)
+
+        # --- Evaluación de Hallazgos ---
+
+        # Finding 2.1: Auth vs Unauth
+        auth_rate = round((auth_count / total_assets) * 100, 1)
+        if auth_rate < 85:
+            impact = 2.0 if auth_rate < 50 else 1.0
+            base_score -= impact
+            evidence = f"Authenticated scan rate is {auth_rate}%. ({auth_count}/{total_assets} assets)."
+            all_findings.append(Finding(title="Low Credentialed Scan Coverage", domain=domain_id, score=impact, observation=evidence, recommendations=["Configure scan credentials or deploy agents"]))
+
+        # Finding 2.2: Scan Recency
+        gap_ratio = len(recent_gaps) / total_assets
+        if gap_ratio > 0.20:
+            base_score -= 1.0
+            evidence = f"Assets not scanned in 30 days ({len(recent_gaps)}): " + ", ".join([str(a.get('name', a.get('ipv4', 'Unknown'))) for a in recent_gaps][:10])
+            all_findings.append(Finding(title="Scanning Frequency Gap", domain=domain_id, score=1.0, observation=evidence, recommendations=["Increase scan frequency to at least every 30 days"]))
+
+        # Finding 2.4: Custom Policies
+        if not policies:
+            base_score -= 0.5
+            evidence = "0 custom policies detected. Environment relies entirely on default Tenable templates."
+            all_findings.append(Finding(title="Lack of Scan Customization", domain=domain_id, score=2.5, observation=evidence, recommendations=["Create custom scan policies for optimized vulnerability detection"]))
+
+    except Exception as e:
+        base_score = 1.0
+        all_findings.append(Finding(title="Domain 2 Audit Error", domain=domain_id, score=1.0, observation=str(e)))
+
+    return all_findings
+
+
+
+============================================================
+ FILE: ./modules/domain5_6_proxy.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Business / Modules
+DESCRIPTION: Identity Hygiene with Evidence Grouping (Brute Force, Stale, SSO).
+AUTHOR: Senior Software Architect
+"""
+
+from core.models import Finding
+from typing import List, Dict, Any
+from datetime import datetime, timezone
+
+def run_audit(master_data: Dict[str, Any]) -> List[Finding]:
+    """
+    Evaluates Governance and Ecosystem via Identity Hygiene with grouped evidence.
+    """
+    all_findings: List[Finding] = []
+    source_tag = "api"
+    base_score_d5 = 5.0
+    
+    # Listas de evidencia
+    brute_force_users = []
+    stale_users = []
+    stale_api_keys = []
+    local_users = []
+
+    try:
+        users = master_data.get('users', [])
+        if not isinstance(users, list) or not users:
+            return []
+
+        total_users = len(users)
+        now = datetime.now(timezone.utc)
+
+        for user in users:
+            u_name = user.get('username') or user.get('name') or "Unknown"
+            
+            # 1. Evidencia de Fuerza Bruta
+            if user.get('login_fail_total', 0) > 5:
+                brute_force_users.append(u_name)
+
+            # 2. Evidencia de Cuentas Stale (> 90 días)
+            last_login_str = user.get('last_login')
+            if not last_login_str:
+                stale_users.append(u_name)
+            else:
+                try:
+                    last_login_dt = datetime.fromisoformat(last_login_str.replace('Z', '+00:00'))
+                    if (now - last_login_dt).days > 90:
+                        stale_users.append(u_name)
+                except: stale_users.append(u_name)
+
+            # 3. Evidencia de API Keys Antiguas (> 180 días)
+            last_api_str = user.get('last_api_key_access')
+            if last_api_str:
+                try:
+                    last_api_dt = datetime.fromisoformat(last_api_str.replace('Z', '+00:00'))
+                    if (now - last_api_dt).days > 180:
+                        stale_api_keys.append(u_name)
+                except: pass
+
+            # 4. Evidencia de Falta de SSO
+            if user.get('type') == 'local':
+                local_users.append(u_name)
+
+        # --- Consolidación de Hallazgos Grouped ---
+
+        if brute_force_users:
+            all_findings.append(Finding(
+                title="Consolidated Brute Force Alert",
+                domain=5, source=source_tag,
+                metrics={"affected_accounts": ", ".join(brute_force_users)},
+                score=1.0, confidence="High",
+                recommendations=["Lock listed accounts", "Force password reset", "Review source logs"]
+            ))
+            base_score_d5 -= 1.0
+
+        if len(stale_users) / total_users > 0.20:
+            all_findings.append(Finding(
+                title="Bulk Stale Accounts (Zombies)",
+                domain=5, source=source_tag,
+                metrics={"affected_accounts": ", ".join(stale_users)},
+                score=1.0, confidence="High",
+                recommendations=["Deprovision listed users", "Implement 90-day inactivity policy"]
+            ))
+            base_score_d5 -= 1.0
+
+        if local_users:
+            all_findings.append(Finding(
+                title="Non-Federated Identity Risk (Local Users)",
+                domain=5, source=source_tag,
+                metrics={"affected_accounts": ", ".join(local_users)},
+                score=3.0, confidence="High",
+                recommendations=["Migrate listed users to SAML/SSO", "Enforce MFA for locals"]
+            ))
+
+        if stale_api_keys:
+            all_findings.append(Finding(
+                title="Stale Integration Credentials (API Keys)",
+                domain=6, source=source_tag,
+                metrics={"affected_accounts": ", ".join(stale_api_keys)},
+                score=3.0, confidence="Medium",
+                recommendations=["Rotate keys for listed accounts", "Disable unused integrations"]
+            ))
+
+    except Exception as e:
+        all_findings.append(Finding(
+            title="Evidence Aggregator Error",
+            domain=5, source="system",
+            metrics={"exception": str(e)},
+            score=1.0, confidence="High",
+            recommendations=["Verify user metadata structure"]
+        ))
+
+    return all_findings
+
+
+
+============================================================
+ FILE: ./modules/domain3_risks.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Business / Modules
+DESCRIPTION: Re-engineered Domain 3 (Risk Prioritization & Analysis).
+             Focuses on Vuln Density, VPR Adoption, and Aging.
+AUTHOR: Senior Software Architect
+"""
+
+from core.models import Finding
+from typing import List, Dict, Any, Tuple
+from datetime import datetime, timezone
+
+def run_audit(master_data: Dict[str, Any]) -> List[Finding]:
+    all_findings: List[Finding] = []
+    domain_id = 3
+    source_tag = "api"
+    base_score = 5.0
+    now = datetime.now(timezone.utc)
+
+    try:
+        vulns = master_data.get('vulnerabilities', [])
+        assets = master_data.get('assets', [])
+        total_assets = len(assets)
+        total_vulns = len(vulns)
+
+        if total_assets == 0:
+            return [Finding(
+                title="Insufficient Data for Risk Analysis",
+                domain=domain_id,
+                score=1.0,
+                observation="No assets found to calculate vulnerability density.",
+                recommendations=["Ensure Step 2 and Step 5 of Data Collector are functional."]
+            )]
+
+        # --- Finding 3.1: Vulnerability Landscape & Density ---
+        density = total_vulns / total_assets
+        if density > 50:
+            base_score -= 1.0
+            evidence = f"Vulnerability density is {density:.2f} per asset. Total C/H/M/L: {total_vulns}."
+            all_findings.append(Finding(
+                title="High Vulnerability Density",
+                domain=domain_id,
+                score=1.0,
+                observation=evidence,
+                recommendations=["Target assets with highest density for immediate remediation."]
+            ))
+
+        # --- Finding 3.2: VPR Adoption vs CVSS ---
+        # Analizamos vulnerabilidades con VPR Crítico (> 9.0)
+        high_vpr_vulns = [v for v in vulns if float(v.get('vpr_score', 0) or 0) >= 9.0]
+        high_vpr_count = len(high_vpr_vulns)
+        
+        # Si no hay VPR en la mayoría o hay muchos riesgos críticos VPR
+        if high_vpr_count > 0:
+            base_score -= 1.0
+            evidence = f"Detected {high_vpr_count} Critical VPR risks. Prioritizing by VPR > 9.0 could reduce immediate exposure."
+            all_findings.append(Finding(
+                title="VPR Prioritization Opportunity",
+                domain=domain_id,
+                score=1.0,
+                observation=evidence,
+                recommendations=["Shift from CVSS-only to VPR-based prioritization to focus on exploitable risks."]
+            ))
+
+        # --- Finding 3.3: Vulnerability Aging (Critical > 30 days) ---
+        old_criticals = []
+        for v in vulns:
+            severity = str(v.get('severity', '')).lower()
+            if severity == 'critical':
+                first_found_str = v.get('first_found')
+                if first_found_str:
+                    try:
+                        # Parseo ISO 8601 compatible con v5.0.17
+                        dt = datetime.fromisoformat(first_found_str.replace('Z', '+00:00'))
+                        age_days = (now - dt).days
+                        if age_days > 30:
+                            old_criticals.append(v)
+                    except:
+                        pass
+
+        if len(old_criticals) > 0:
+            base_score -= 1.0
+            titles = [v.get('plugin', {}).get('name', 'Unknown')[:30] for v in old_criticals]
+            evidence = f"Critical vulnerabilities older than 30 days ({len(old_criticals)}): " + ", ".join(titles[:5])
+            all_findings.append(Finding(
+                title="Critical Vulnerability Aging",
+                domain=domain_id,
+                score=1.0,
+                observation=evidence,
+                recommendations=["Enforce stricter SLAs for 'Critical' severity findings to stay under 30 days."]
+            ))
+
+    except Exception as e:
+        base_score = 1.0
+        all_findings.append(Finding(
+            title="Domain 3 Audit Error",
+            domain=domain_id,
+            score=1.0,
+            observation=f"Error processing risk data: {str(e)}"
+        ))
+
+    return all_findings
+
+
+
+============================================================
+ FILE: ./test_connection.py
+============================================================
+import requests
+from core.connection import TenableConnection
+
+def test():
+    print("--- [DIAGNÓSTICO DE CONEXIÓN V5] ---")
+    try:
+        # Instanciar la lógica que ya creamos en core/
+        conn = TenableConnection()
+        headers = conn.get_headers()
+        url = f"{conn.base_url}/scanners"
+        
+        print(f"[*] Intentando conectar a: {conn.base_url}")
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            print("[SUCCESS] Conexión establecida exitosamente.")
+            print(f"[INFO] Código de estado: {response.status_code}")
+            # Mostrar cuántos scanners ve la cuenta para confirmar permisos
+            scanners_count = len(response.json().get('scanners', []))
+            print(f"[INFO] Scanners detectados: {scanners_count}")
+        else:
+            print(f"[FAILURE] Tenable respondió con error.")
+            print(f"[DEBUG] Código: {response.status_code}")
+            print(f"[DEBUG] Respuesta: {response.text}")
+
+    except Exception as e:
+        print(f"[ERROR] No se pudo iniciar la conexión: {e}")
+
+if __name__ == "__main__":
+    test()
+
+
+
+============================================================
+ FILE: ./core/connection.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Core / Connection
+DESCRIPTION: Robust REST Client with GET/POST support.
+AUTHOR: Senior Software Architect
+"""
+
+import os
+import requests
+from dotenv import load_dotenv
+
+class TenableConnection:
+    def __init__(self):
+        load_dotenv()
+        self.access_key = os.getenv("TENABLE_ACCESS_KEY")
+        self.secret_key = os.getenv("TENABLE_SECRET_KEY")
+        self.base_url = "https://cloud.tenable.com"
+        
+        if not self.access_key or not self.secret_key:
+            raise ValueError("CRITICAL: API Keys missing in .env")
+            
+        self.headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-ApiKeys": f"accessKey={self.access_key}; secretKey={self.secret_key}"
+        }
+
+    def get(self, endpoint: str):
+        url = f"{self.base_url}{endpoint}"
+        response = requests.get(url, headers=self.headers)
+        response.raise_for_status()
+        return response.json()
+
+    def post(self, endpoint: str, json: dict = None):
+        url = f"{self.base_url}{endpoint}"
+        response = requests.post(url, headers=self.headers, json=json or {})
+        response.raise_for_status()
+        return response.json()
+
+
+
+============================================================
+ FILE: ./core/__init__.py
+============================================================
+
+
+
+============================================================
+ FILE: ./core/context_loader.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Core / Context
+DESCRIPTION: Loads manual business context from JSON.
+"""
+import json
+import os
+
+def load_context():
+    path = "data/context_input.json"
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, 'r') as f:
+            data = json.load(f)
+            return data.get('context', {})
+    except Exception:
+        return {}
+
+def display_context_info(context):
+    print("="*60)
+    print("         STRATEGIC CONTEXT LOADED (v5.1.0)")
+    print("="*60)
+    print(f" > Expected Assets     : {context.get('expected_assets', 'N/A')}")
+    print(f" > Critical SLA (Days) : {context.get('internal_sla_critical', 'N/A')}")
+    print(f" > Maint. Windows      : {'Enabled' if context.get('maintenance_windows') else 'Disabled'}")
+    print("-"*60)
+    print("[TIP] To adjust these values, edit: data/context_input.json")
+    print("="*60)
+
+
+
+============================================================
+ FILE: ./core/scoring.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Core / Scoring
+DESCRIPTION: Maturity calculation engine. Supports override_score logic.
+AUTHOR: Senior Software Architect
+"""
+from typing import List, Dict
+from core.models import Finding
+
+def calculate_maturity(findings: List[Finding]) -> Dict[int, float]:
+    domain_scores = {1: 5.0, 2: 5.0, 3: 5.0, 4: 5.0, 5: 5.0, 6: 5.0}
+    
+    for f in findings:
+        if f.domain in domain_scores:
+            penalty = f.score if f.override_score is None else f.override_score
+            domain_scores[f.domain] -= penalty
+            
+    for domain in domain_scores:
+        domain_scores[domain] = max(1.0, min(5.0, domain_scores[domain]))
+        
+    return domain_scores
+
+
+
+============================================================
+ FILE: ./core/models.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Core / Models
+DESCRIPTION: Golden Model. Universal compatibility for all audit domains and scoring engine.
+AUTHOR: Senior Software Architect
+"""
+
+from dataclasses import dataclass, field
+from typing import List, Dict, Any, Optional
+
+@dataclass
+class Finding:
+    title: str
+    domain: int
+    score: float
+    observation: str = "N/A"
+    source: str = "api"
+    confidence: str = "High"
+    override_score: Optional[float] = None
+    recommendations: List[str] = field(default_factory=list)
+    metrics: Dict[str, Any] = field(default_factory=dict)
+
+
+
+============================================================
+ FILE: ./core/data_collector.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Core / Data Collection
+DESCRIPTION: Silent execution collector. Polling and 403/405 errors are silenced. 
+             Steps 3 and 4 are separated for CLI clarity.
+AUTHOR: Senior Software Architect
+"""
+
+import time
+from typing import Dict, Any, List
+
+class TenableDataCollector:
+    def __init__(self, connection):
+        self.connection = connection
+
+    def _wait_for_export(self, export_type: str, uuid: str) -> List[int]:
+        """Polls export status silently until FINISHED."""
+        while True:
+            try:
+                status_res = self.connection.get(f"/{export_type}/export/{uuid}/status")
+                status = status_res.get("status")
+                if status == "FINISHED":
+                    return status_res.get("chunks_available", [])
+                elif status == "ERROR":
+                    return []
+            except:
+                return []
+            time.sleep(2)
+
+    def collect_all(self) -> Dict[str, Any]:
+        print("[*] Starting Phase 1 Silent Collection (v5.0.16)...")
+        data = {
+            'infrastructure': {}, 'assets': [], 'vulnerabilities': [],
+            'users': [], 'audit_log': [], 'scans': [], 'policies': [], 'tags': []
+        }
+
+        # --- STEP 1: Infrastructure (Silent) ---
+        print(" [Step 1/7] Fetching Hybrid Sensors...")
+        infra = {'scanners': [], 'was_scanners': [], 'nnm_monitors': [], 'connectors': [], 'exclusions': []}
+        try:
+            infra['scanners'] = self.connection.get("/scanners").get('scanners', [])
+            try: infra['connectors'] = self.connection.get("/connectors").get('connectors', [])
+            except: pass
+        except: pass
+        data['infrastructure'] = infra
+
+        # --- STEP 2: Assets (Silent Polling) ---
+        print(" [Step 2/7] Exporting Assets...")
+        try:
+            asset_payload = {"chunk_size": 1000, "filters": {"is_terminated": False}}
+            asset_req = self.connection.post("/assets/export", json=asset_payload)
+            a_uuid = asset_req.get("export_uuid")
+            chunks = self._wait_for_export("assets", a_uuid)
+            for c_id in chunks:
+                chunk_data = self.connection.get(f"/assets/export/{a_uuid}/chunks/{c_id}")
+                data['assets'].extend(chunk_data if isinstance(chunk_data, list) else [])
+        except: pass
+
+        # --- STEP 3: Scans (Separated) ---
+        print(" [Step 3/7] Fetching Scans...")
+        try:
+            data['scans'] = self.connection.get("/scans").get('scans', [])
+        except: pass
+
+        # --- STEP 4: Policies (Separated) ---
+        print(" [Step 4/7] Fetching Policies...")
+        try:
+            data['policies'] = self.connection.get("/policies").get('policies', [])
+            data['tags'] = self.connection.get("/tags/values").get('values', [])
+        except: pass
+
+        # --- STEP 5: Vulnerabilities (Flattening Engine) ---
+        print(" [Step 5/7] Exporting Vulnerabilities...")
+        try:
+            vuln_payload = {"filters": {"severity": ["low", "medium", "high", "critical"], "state": ["OPEN", "REOPENED"]}}
+            vuln_req = self.connection.post("/vulns/export", json=vuln_payload)
+            v_uuid = vuln_req.get("export_uuid")
+            chunks = self._wait_for_export("vulns", v_uuid)
+            
+            for c_id in chunks:
+                chunk_data = self.connection.get(f"/vulns/export/{v_uuid}/chunks/{c_id}")
+                for vuln in chunk_data:
+                    port_val = vuln.get("port") or vuln.get("plugin", {}).get("port", [0])
+                    if isinstance(port_val, list):
+                        for p in port_val:
+                            v_copy = vuln.copy()
+                            v_copy['port'] = p
+                            data['vulnerabilities'].append(v_copy)
+                    else:
+                        data['vulnerabilities'].append(vuln)
+        except: pass
+
+        # --- STEP 6: Users (Silent 403) ---
+        print(" [Step 6/7] Fetching Platform Users...")
+        try:
+            data['users'] = self.connection.get("/users").get('users', [])
+        except: pass
+
+        # --- STEP 7: Audit Logs (Silent 403) ---
+        print(" [Step 7/7] Fetching Audit Logs...")
+        try:
+            res = self.connection.get("/audit-log/events?limit=500")
+            data['audit_log'] = res.get('events', [])
+        except:
+            data['audit_log'] = []
+
+        print("-" * 60)
+        print(f"[SUCCESS] Collection Complete (v5.0.16)")
+        print(f" > Total Assets: {len(data['assets'])} | Total Vulns: {len(data['vulnerabilities'])}")
+        print("-" * 60)
+        
+        return data
+
+
+
+============================================================
+ FILE: ./reports/export_engine.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Reports / Export
+DESCRIPTION: Forensic PDF and TXT Report Generator.
+AUTHOR: Senior Software Architect
+"""
+import os
+from datetime import datetime
+from fpdf import FPDF
+from typing import List, Dict
+from core.models import Finding
+
+def generate_reports(findings: List[Finding], scores: Dict[int, float]):
+    """
+    Main entry point for report generation.
+    """
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+    report_dir = "reports/reports"
+    os.makedirs(report_dir, exist_ok=True)
+    
+    base_filename = f"{report_dir}/Audit_Report_{timestamp}"
+    
+    # Simple TXT generation for verification
+    with open(f"{base_filename}.txt", "w") as f:
+        f.write("TENABLE HEALTH CHECK SUMMARY\n")
+        f.write("="*30 + "\n")
+        for domain, score in scores.items():
+            f.write(f"Domain {domain}: {score:.2f}/5.0\n")
+            
+    print(f"[*] TXT Report saved in: {base_filename}.txt")
+    
+    # PDF generation logic (Minimalist)
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(40, 10, 'Tenable Maturity Assessment v5.1.0')
+    pdf.output(f"{base_filename}.pdf")
+    print(f"[*] PDF Report saved in: {base_filename}.pdf")
+
+
+
+
+============================================================
+ FILE: ./main.py
+============================================================
+"""
+PROJECT: [V5-Tenable Health Check API Automation]
+VERSION: 5.1.0
+LAYER: Orchestration
+DESCRIPTION: Main entry point. Now integrates Strategic Context Engine.
+AUTHOR: Senior Software Architect
+"""
+import time
+from core import connection, data_collector, scoring, context_loader
+from modules import domain1_assets, domain2_scans, domain3_risks, domain4_remediation, domain5_6_proxy
+from reports import export_engine
+
+def main():
+    print("============================================================")
+    print("               V5-TENABLE HEALTH CHECK SYSTEM               ")
+    print("                 Orchestrator V5.1.0 - PHASE 2              ")
+    print("============================================================")
+
+    # Step 0: Load Strategic Context
+    context = context_loader.load_context()
+    context_loader.display_context_info(context)
+
+    # Step 1: Connect and Collect
+    conn = connection.TenableConnection()
+    collector = data_collector.TenableDataCollector(conn)
+    master_data = collector.collect_all()
+    
+    # Inject Context into Master Data for Modules
+    master_data['context'] = context
+
+    # Step 2: Audit Domains
+    print("[*] Executing Strategic Audit Modules...")
+    all_findings = []
+    all_findings.extend(domain1_assets.run_audit(master_data))
+    all_findings.extend(domain2_scans.run_audit(master_data))
+    all_findings.extend(domain3_risks.run_audit(master_data))
+    all_findings.extend(domain4_remediation.run_audit(master_data))
+    all_findings.extend(domain5_6_proxy.run_audit(master_data))
+
+    # Step 3: Scoring & Reporting
+    final_scores = scoring.calculate_maturity(all_findings)
+    export_engine.generate_reports(all_findings, final_scores)
+
+    print("\n[SUCCESS] Phase 2 Strategic Health Check Completed.")
+
+if __name__ == "__main__":
+    main()
+
+
+
+============================================================
+ FILE: ./test_task1.py
+============================================================
+from core.models import Finding
+from core.scoring import ScoringEngine
+
+def run_tests():
+    print("=== INICIANDO PRUEBAS DE LA TAREA 1 ===")
+    
+    # 1. Probar la creación correcta de Hallazgos (Findings)
+    print("\n[*] Creando hallazgos de prueba...")
+    f1 = Finding(
+        title="Baja cobertura de escaneo", domain=1, source="api", 
+        metrics={"coverage": 65}, score=2.0, confidence="High", 
+        recommendations=["Escanear más redes"]
+    )
+    f2 = Finding(
+        title="Agentes desconectados", domain=1, source="api", 
+        metrics={"offline": 15}, score=4.0, confidence="Medium", 
+        recommendations=["Revisar conectividad"]
+    )
+    f3 = Finding(
+        title="Escaneos sin credenciales", domain=2, source="api", 
+        metrics={"auth_rate": 40}, score=1.5, confidence="High", 
+        recommendations=["Añadir credenciales"]
+    )
+    print("[+] 3 Hallazgos válidos creados exitosamente.")
+
+    # 2. Probar la validación de errores (Resiliencia)
+    print("\n[*] Probando validación de puntuación (Debe ser entre 1 y 5)...")
+    try:
+        f_bad = Finding(
+            title="Error", domain=1, source="api", metrics={}, 
+            score=8.5, confidence="Low", recommendations=[]
+        )
+        print("[-] ERROR: El sistema permitió una puntuación inválida.")
+    except ValueError as e:
+        print(f"[+] Validación exitosa. El sistema bloqueó el error: {e}")
+
+    # 3. Probar el Motor de Puntuación (Scoring Engine)
+    print("\n[*] Probando cálculos matemáticos del Scoring Engine...")
+    engine = ScoringEngine()
+    
+    domain_scores = engine.calculate_domain_scores([f1, f2, f3])
+    print(f"[+] Puntuaciones por Dominio calculadas: {domain_scores}")
+    print("    -> Esperado para Dominio 1: 3.0 (Promedio de 2.0 y 4.0)")
+    print("    -> Esperado para Dominio 2: 1.5 (Único valor 1.5)")
+
+    overall = engine.calculate_overall_score(domain_scores)
+    print(f"[+] Puntuación General calculada: {overall}")
+    print("    -> Toma los promedios y los multiplica por los pesos de la Fase 1.")
+    
+    print("\n=== PRUEBAS FINALIZADAS CON ÉXITO ===")
+
+if __name__ == "__main__":
+    run_tests()
+
+
+

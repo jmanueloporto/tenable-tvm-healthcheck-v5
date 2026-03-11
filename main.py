@@ -1,8 +1,8 @@
 """
 PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.1.0
+VERSION: 5.1.3
 LAYER: Orchestration
-DESCRIPTION: Main entry point. Now integrates Strategic Context Engine.
+DESCRIPTION: Orchestrator V5.1.3 - PHASE 2 (Contextual Override & Reporting).
 AUTHOR: Senior Software Architect
 """
 import time
@@ -11,24 +11,23 @@ from modules import domain1_assets, domain2_scans, domain3_risks, domain4_remedi
 from reports import export_engine
 
 def main():
-    print("============================================================")
+    start_time = time.time()
+    print("="*60)
     print("               V5-TENABLE HEALTH CHECK SYSTEM               ")
-    print("                 Orchestrator V5.1.0 - PHASE 2              ")
-    print("============================================================")
+    print("      Orchestrator V5.1.3 - PHASE 2 (Forensic SLA)          ")
+    print("="*60)
 
-    # Step 0: Load Strategic Context
+    # Contexto Estratégico (v5.1.0)
     context = context_loader.load_context()
     context_loader.display_context_info(context)
 
-    # Step 1: Connect and Collect
+    # Recolección Silenciosa (v5.0.16)
     conn = connection.TenableConnection()
     collector = data_collector.TenableDataCollector(conn)
     master_data = collector.collect_all()
-    
-    # Inject Context into Master Data for Modules
     master_data['context'] = context
 
-    # Step 2: Audit Domains
+    # Auditoría de Dominios (v5.1.2)
     print("[*] Executing Strategic Audit Modules...")
     all_findings = []
     all_findings.extend(domain1_assets.run_audit(master_data))
@@ -37,11 +36,12 @@ def main():
     all_findings.extend(domain4_remediation.run_audit(master_data))
     all_findings.extend(domain5_6_proxy.run_audit(master_data))
 
-    # Step 3: Scoring & Reporting
-    final_scores = scoring.calculate_maturity(all_findings)
-    export_engine.generate_reports(all_findings, final_scores)
-
-    print("\n[SUCCESS] Phase 2 Strategic Health Check Completed.")
+    # Scoring Contextual y Reportes (v5.1.3)
+    scores, global_score = scoring.calculate_maturity(all_findings, context)
+    exec_time = time.time() - start_time
+    
+    export_engine.generate_reports(all_findings, scores, global_score, exec_time)
+    print(f"\n[DONE] Execution completed in {exec_time:.2f} seconds.")
 
 if __name__ == "__main__":
     main()
