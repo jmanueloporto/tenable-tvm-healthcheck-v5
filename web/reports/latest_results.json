@@ -1,0 +1,121 @@
+{
+    "timestamp": "2026-03-11T21:19:13.947291",
+    "execution_time": 12.21,
+    "global_score": 2.25,
+    "domain_scores": {
+        "1": 1.5,
+        "2": 1.0,
+        "3": 4.0,
+        "4": 1.0,
+        "5": 1.0,
+        "6": 5.0
+    },
+    "findings": [
+        {
+            "title": "Stale Asset Inventory",
+            "domain": 1,
+            "domain_name": "Asset Visibility",
+            "score": 1.0,
+            "observation": "Stale assets detected: 31",
+            "recommendations": [
+                "Decommission or rescan stale assets"
+            ]
+        },
+        {
+            "title": "Missing Cloud Connectors",
+            "domain": 1,
+            "domain_name": "Asset Visibility",
+            "score": 2.5,
+            "observation": "No Cloud Connectors detected.",
+            "recommendations": [
+                "Configure AWS/Azure/GCP connectors"
+            ]
+        },
+        {
+            "title": "Low Credentialed Scan Coverage",
+            "domain": 2,
+            "domain_name": "Scanning Operations",
+            "score": 1.0,
+            "observation": "Authenticated scan rate is 61.5%. (24/39 assets).",
+            "recommendations": [
+                "Configure scan credentials or deploy agents"
+            ]
+        },
+        {
+            "title": "Scanning Frequency Gap",
+            "domain": 2,
+            "domain_name": "Scanning Operations",
+            "score": 1.0,
+            "observation": "Assets not scanned in 30 days (30): Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown",
+            "recommendations": [
+                "Increase scan frequency to at least every 30 days"
+            ]
+        },
+        {
+            "title": "Lack of Scan Customization",
+            "domain": 2,
+            "domain_name": "Scanning Operations",
+            "score": 2.5,
+            "observation": "0 custom policies detected. Environment relies entirely on default Tenable templates.",
+            "recommendations": [
+                "Create custom scan policies for optimized vulnerability detection"
+            ]
+        },
+        {
+            "title": "Critical Vulnerability Aging",
+            "domain": 3,
+            "domain_name": "Risk Prioritization",
+            "score": 1.0,
+            "observation": "Critical vulnerabilities older than 30 days (3): Node.js 20.x < 20.20.0 / 22.x , Microsoft .NET Core SEoL, Tenable Log Correlation Engine",
+            "recommendations": [
+                "Enforce stricter SLAs for 'Critical' severity findings to stay under 30 days."
+            ]
+        },
+        {
+            "title": "Critical Risk: SLA Breach Detected",
+            "domain": 4,
+            "domain_name": "Remediation & SLA",
+            "score": 5.0,
+            "observation": "Se detectaron 3 vulnerabilidades Criticas abiertas que superan el SLA interno de 30 dias.",
+            "recommendations": [
+                "Priorizar la remediacion de los 3 hallazgos fuera de SLA",
+                "Revisar cuellos de botella en el proceso de parcheo",
+                "Validar si los activos afectados requieren ventanas de mantenimiento urgentes"
+            ]
+        },
+        {
+            "title": "Consolidated Brute Force Alert",
+            "domain": 5,
+            "domain_name": "Identity Hygiene",
+            "score": 1.0,
+            "observation": "N/A",
+            "recommendations": [
+                "Lock listed accounts",
+                "Force password reset",
+                "Review source logs"
+            ]
+        },
+        {
+            "title": "Bulk Stale Accounts (Zombies)",
+            "domain": 5,
+            "domain_name": "Identity Hygiene",
+            "score": 1.0,
+            "observation": "N/A",
+            "recommendations": [
+                "Deprovision listed users",
+                "Implement 90-day inactivity policy"
+            ]
+        },
+        {
+            "title": "Non-Federated Identity Risk (Local Users)",
+            "domain": 5,
+            "domain_name": "Identity Hygiene",
+            "score": 3.0,
+            "observation": "N/A",
+            "recommendations": [
+                "Migrate listed users to SAML/SSO",
+                "Enforce MFA for locals"
+            ]
+        }
+    ]
+}

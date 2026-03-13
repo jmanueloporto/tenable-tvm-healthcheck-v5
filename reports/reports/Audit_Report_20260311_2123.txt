@@ -1,0 +1,84 @@
+======================================================================
+               DETAILED MATURITY AUDIT REPORT (v5.2.1)                
+======================================================================
+
+GLOBAL MATURITY SCORE  : 2.25 / 5.0
+Execution Time         : 11.10s
+
+[I] DOMAIN SUMMARY
+------------------------------
+ > Domain 1 - Asset Visibility (Shadow IT)  : 1.50/5.0
+ > Domain 2 - Scanning Operations           : 1.00/5.0
+ > Domain 3 - Risk Prioritization           : 4.00/5.0
+ > Domain 4 - Remediation & SLA             : 1.00/5.0
+ > Domain 5 - Identity Hygiene              : 1.00/5.0
+ > Domain 6 - Ecosystem & Governance        : 5.00/5.0
+
+[II] DETAILED EVIDENCE & FINDINGS
+------------------------------
+Finding #1: Stale Asset Inventory
+ Score Impact: 1.0
+ Observation : Stale assets detected: 31
+ Recommendations:
+   * Decommission or rescan stale assets
+----------------------------------------
+Finding #2: Missing Cloud Connectors
+ Score Impact: 2.5
+ Observation : No Cloud Connectors detected.
+ Recommendations:
+   * Configure AWS/Azure/GCP connectors
+----------------------------------------
+Finding #3: Low Credentialed Scan Coverage
+ Score Impact: 1.0
+ Observation : Authenticated scan rate is 61.5%. (24/39 assets).
+ Recommendations:
+   * Configure scan credentials or deploy agents
+----------------------------------------
+Finding #4: Scanning Frequency Gap
+ Score Impact: 1.0
+ Observation : Assets not scanned in 30 days (30): Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown
+ Recommendations:
+   * Increase scan frequency to at least every 30 days
+----------------------------------------
+Finding #5: Lack of Scan Customization
+ Score Impact: 2.5
+ Observation : 0 custom policies detected. Environment relies entirely on default Tenable templates.
+ Recommendations:
+   * Create custom scan policies for optimized vulnerability detection
+----------------------------------------
+Finding #6: Critical Vulnerability Aging
+ Score Impact: 1.0
+ Observation : Critical vulnerabilities older than 30 days (3): Node.js 20.x < 20.20.0 / 22.x , Microsoft .NET Core SEoL, Tenable Log Correlation Engine
+ Recommendations:
+   * Enforce stricter SLAs for 'Critical' severity findings to stay under 30 days.
+----------------------------------------
+Finding #7: Critical Risk: SLA Breach Detected
+ Score Impact: 5.0
+ Observation : Se detectaron 3 vulnerabilidades Criticas abiertas que superan el SLA interno de 30 dias.
+ Recommendations:
+   * Priorizar la remediacion de los 3 hallazgos fuera de SLA
+   * Revisar cuellos de botella en el proceso de parcheo
+   * Validar si los activos afectados requieren ventanas de mantenimiento urgentes
+----------------------------------------
+Finding #8: Consolidated Brute Force Alert
+ Score Impact: 1.0
+ Observation : N/A
+ Recommendations:
+   * Lock listed accounts
+   * Force password reset
+   * Review source logs
+----------------------------------------
+Finding #9: Bulk Stale Accounts (Zombies)
+ Score Impact: 1.0
+ Observation : N/A
+ Recommendations:
+   * Deprovision listed users
+   * Implement 90-day inactivity policy
+----------------------------------------
+Finding #10: Non-Federated Identity Risk (Local Users)
+ Score Impact: 3.0
+ Observation : N/A
+ Recommendations:
+   * Migrate listed users to SAML/SSO
+   * Enforce MFA for locals
+----------------------------------------

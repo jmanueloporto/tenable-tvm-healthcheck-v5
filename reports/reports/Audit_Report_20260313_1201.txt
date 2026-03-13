@@ -1,0 +1,39 @@
+======================================================================
+               DETAILED MATURITY AUDIT REPORT (v5.3.3)                
+======================================================================
+
+GLOBAL SCORE: 2.83 / 5.0 | Time: 54.80s
+
+Finding #1: Critical Risk: Shadow IT Gap
+ Observation : Brecha de visibilidad del 61.0% detectada. Expected: 100 | Detected: 39 | Gap: 61
+----------------------------------------
+Finding #2: Stale Asset Inventory
+ Observation : Stale assets detected: 31
+----------------------------------------
+Finding #3: Missing Cloud Connectors
+ Observation : No Cloud Connectors detected.
+----------------------------------------
+Finding #4: Low Credentialed Scan Coverage
+ Observation : Authenticated scan rate is 61.5%. (24/39 assets).
+----------------------------------------
+Finding #5: Scanning Frequency Gap
+ Observation : Assets not scanned in 30 days (29): Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown
+----------------------------------------
+Finding #6: Lack of Scan Customization
+ Observation : [OVERRIDE MANTENIMIENTO] 0 custom policies detected. Environment relies entirely on default Tenable templates.
+----------------------------------------
+Finding #7: Critical Vulnerability Aging
+ Observation : Critical vulnerabilities older than 30 days (4): Microsoft Office Unsupported V, Node.js 20.x < 20.20.0 / 22.x , Microsoft .NET Core SEoL, Tenable Log Correlation Engine
+----------------------------------------
+Finding #8: Critical Risk: SLA Breach Detected
+ Observation : [OVERRIDE MANTENIMIENTO] Se detectaron 6 vulnerabilidades Criticas abiertas que superan el SLA interno de 15 dias.
+----------------------------------------
+Finding #9: Consolidated Brute Force Alert
+ Observation : N/A
+----------------------------------------
+Finding #10: Bulk Stale Accounts (Zombies)
+ Observation : N/A
+----------------------------------------
+Finding #11: Non-Federated Identity Risk (Local Users)
+ Observation : N/A
+----------------------------------------

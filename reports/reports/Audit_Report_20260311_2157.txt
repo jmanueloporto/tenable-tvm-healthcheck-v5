@@ -1,0 +1,60 @@
+======================================================================
+               DETAILED MATURITY AUDIT REPORT (v5.2.3)                
+======================================================================
+
+GLOBAL SCORE: 2.83 / 5.0 | Time: 11.85s
+
+ > Domain 1 - Asset Visibility (Shadow IT)       : 1.00/5.0
+ > Domain 2 - Scanning Operations                : 2.00/5.0
+ > Domain 3 - Risk Prioritization                : 4.00/5.0
+ > Domain 4 - Remediation & SLA                  : 4.00/5.0
+ > Domain 5 - Identity Hygiene                   : 1.00/5.0
+ > Domain 6 - Ecosystem & Governance             : 5.00/5.0
+
+----------------------------------------------------------------------
+DETAILED FINDINGS
+----------------------------------------------------------------------
+Finding #1: Critical Risk: Shadow IT Gap
+ Observation : Brecha de visibilidad del 61.0% detectada. Expected: 100 | Detected: 39 | Gap: 61
+ Recommendations: Ejecutar Discovery Scans, Revisar alcance de escaneo y despliegue de agentes
+----------------------------------------
+Finding #2: Stale Asset Inventory
+ Observation : Stale assets detected: 31
+ Recommendations: Decommission or rescan stale assets
+----------------------------------------
+Finding #3: Missing Cloud Connectors
+ Observation : No Cloud Connectors detected.
+ Recommendations: Configure AWS/Azure/GCP connectors
+----------------------------------------
+Finding #4: Low Credentialed Scan Coverage
+ Observation : Authenticated scan rate is 61.5%. (24/39 assets).
+ Recommendations: Configure scan credentials or deploy agents
+----------------------------------------
+Finding #5: Scanning Frequency Gap
+ Observation : Assets not scanned in 30 days (30): Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown
+ Recommendations: Increase scan frequency to at least every 30 days
+----------------------------------------
+Finding #6: Lack of Scan Customization
+ Observation : [OVERRIDE MANTENIMIENTO] 0 custom policies detected. Environment relies entirely on default Tenable templates.
+ Recommendations: Create custom scan policies for optimized vulnerability detection
+----------------------------------------
+Finding #7: Critical Vulnerability Aging
+ Observation : Critical vulnerabilities older than 30 days (3): Node.js 20.x < 20.20.0 / 22.x , Microsoft .NET Core SEoL, Tenable Log Correlation Engine
+ Recommendations: Enforce stricter SLAs for 'Critical' severity findings to stay under 30 days.
+----------------------------------------
+Finding #8: Critical Risk: SLA Breach Detected
+ Observation : [OVERRIDE MANTENIMIENTO] Se detectaron 6 vulnerabilidades Criticas abiertas que superan el SLA interno de 15 dias.
+ Recommendations: Priorizar la remediacion de los 6 hallazgos fuera de SLA, Revisar cuellos de botella en el proceso de parcheo, Validar si los activos afectados requieren ventanas de mantenimiento urgentes
+----------------------------------------
+Finding #9: Consolidated Brute Force Alert
+ Observation : N/A
+ Recommendations: Lock listed accounts, Force password reset, Review source logs
+----------------------------------------
+Finding #10: Bulk Stale Accounts (Zombies)
+ Observation : N/A
+ Recommendations: Deprovision listed users, Implement 90-day inactivity policy
+----------------------------------------
+Finding #11: Non-Federated Identity Risk (Local Users)
+ Observation : N/A
+ Recommendations: Migrate listed users to SAML/SSO, Enforce MFA for locals
+----------------------------------------

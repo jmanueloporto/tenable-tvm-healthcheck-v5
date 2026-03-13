@@ -1,0 +1,7 @@
+GLOBAL MATURITY SCORE: 2.83 / 5.0
+ > Domain 1: 1.00/5.0
+ > Domain 2: 2.00/5.0
+ > Domain 3: 4.00/5.0
+ > Domain 4: 4.00/5.0
+ > Domain 5: 1.00/5.0
+ > Domain 6: 5.00/5.0
