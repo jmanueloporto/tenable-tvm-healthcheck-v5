@@ -1,6 +1,10 @@
-.venv/
+# Version Control Exclusion - v5.1.1
 __pycache__/
-*.py[cod]
+*.pyc
 .env
-reports/*.txt
-reports/*.json
+.venv/
+reports/reports/*.pdf
+reports/reports/*.txt
+full_project_code_*.txt
+evidence.json
+master_data.json
