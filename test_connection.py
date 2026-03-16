@@ -1,4 +1,4 @@
-# VERSION: 5.1.1-FINAL
+# VERSION: 5.3.3-FINAL
 import requests
 from core.connection import TenableConnection
 

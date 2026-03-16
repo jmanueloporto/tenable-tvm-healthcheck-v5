@@ -1,0 +1,33 @@
+{
+    "timestamp": "2026-03-13T14:50:59.319921",
+    "execution_time": 0.0,
+    "global_score": 4.0,
+    "domain_scores": {
+        "1": 1.0,
+        "2": 5.0,
+        "3": 4.0,
+        "4": 4.0,
+        "5": 5.0,
+        "6": 5.0
+    },
+    "findings": [
+        {
+            "title": "Critical Risk: Shadow IT Gap",
+            "domain": 1,
+            "score": 5.0,
+            "observation": "Brecha de visibilidad del 100.0% detectada. Expected: 100 | Detected: 0 | Gap: 100"
+        },
+        {
+            "title": "Insufficient Data for Risk Analysis",
+            "domain": 3,
+            "score": 1.0,
+            "observation": "No assets found to calculate vulnerability density."
+        },
+        {
+            "title": "SLA Compliance: Healthy Status",
+            "domain": 4,
+            "score": 1.0,
+            "observation": "No se detectaron vulnerabilidades Criticas que superen el SLA de 15 dias."
+        }
+    ]
+}

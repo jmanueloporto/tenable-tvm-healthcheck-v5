@@ -1,7 +1,7 @@
-# VERSION: 5.1.1-FINAL
+# VERSION: 5.3.3-FINAL
 """
 PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.1.1
+VERSION: 5.3.3
 LAYER: Core / Data Collection
 DESCRIPTION: Silent execution collector. Polling and 403/405 errors are silenced. 
              Steps 3 and 4 are separated for CLI clarity.

@@ -1,4 +1,4 @@
-# VERSION: 5.1.1-FINAL
+# VERSION: 5.3.3-FINAL
 from flask import Flask, render_template, jsonify
 import json
 import os
@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 @app.route('/')
 def index():
-    json_path = os.path.join(BASE_DIR, '../reports/latest_results.json')
+    json_path = os.path.join(BASE_DIR, '/home/adminu/mpiv/tenable-tvm-healthcheck-v5/reports/latest_results.json')
     data = {}
     if os.path.exists(json_path):
         with open(json_path, 'r', encoding='utf-8') as f:
@@ -22,7 +22,7 @@ def index():
 def run_audit():
     try:
         python_exe = '/home/adminu/mpiv/tenable-tvm-healthcheck-v5/.venv/bin/python'
-        result = subprocess.run([python_exe, '../main.py'], cwd='../', capture_output=True, text=True)
+        result = subprocess.run([python_exe, '/home/adminu/mpiv/tenable-tvm-healthcheck-v5/main.py'], cwd='/home/adminu/mpiv/tenable-tvm-healthcheck-v5/', capture_output=True, text=True)
         if result.returncode == 0:
             return jsonify({"status": "success"})
         return jsonify({"status": "error", "message": result.stderr}), 500
