@@ -1,3 +1,4 @@
+# VERSION: 5.1.1-FINAL
 from core.models import Finding
 from core.scoring import ScoringEngine
 

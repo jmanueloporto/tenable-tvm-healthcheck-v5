@@ -1,22 +1,23 @@
+# VERSION: 5.1.1-FINAL
 """
 PROJECT: [V5-Tenable Health Check API Automation]
 VERSION: 5.1.1
 LAYER: Core / Models
-DESCRIPTION: Golden Model. Universal compatibility for all audit domains and scoring engine.
+DESCRIPTION: Universal Golden Model. Supports metrics, confidence and metadata.
 AUTHOR: Senior Software Architect
 """
-
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
+from typing import List, Optional, Dict, Any
 
 @dataclass
 class Finding:
     title: str
     domain: int
     score: float
-    observation: str = "N/A"
-    source: str = "api"
+    observation: str = ""
+    evidence: str = ""
+    source: str = "Tenable API"
     confidence: str = "High"
-    override_score: Optional[float] = None
-    recommendations: List[str] = field(default_factory=list)
     metrics: Dict[str, Any] = field(default_factory=dict)
+    recommendations: List[str] = field(default_factory=list)
+    override_score: Optional[float] = None
