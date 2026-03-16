@@ -1,38 +1,23 @@
-# VERSION: 5.1.1
-"""
-LAYER: Module / Governance
-DESCRIPTION: Audit of user management using absolute detected values (44 users).
-"""
+# VERSION: 5.1.1-FINAL
+from core.models import Finding
 
 class GovernanceValidator:
     def __init__(self, master_data):
         self.users = master_data.get('users', [])
 
     def validate_user_governance(self):
-        # Captura del valor real absoluto detectado por la API
+        # Captura real de los 44 usuarios detectados
         actual_user_count = len(self.users)
+        penalty = 0.0 if actual_user_count > 5 else 1.5
         
-        # Lógica de madurez: > 5 usuarios se considera un entorno saludable
-        score = 5.0 if actual_user_count > 5 else 3.5
-        status = f"Healthy ({actual_user_count} users detected)"
-        
-        return {
-            'domain': 5,
-            'title': 'Governance & User Management',
-            'score': score,
-            'observation': status
-        }
+        return Finding(
+            title="User Inventory Integrity",
+            domain=5,
+            score=penalty,
+            observation=f"Detected {actual_user_count} real users in Tenable platform.",
+            recommendations=["Maintain periodic review of active users"]
+        )
 
 def run_audit(master_data):
-    """ Función puente para compatibilidad con el Orquestador V5.1.1 """
     validator = GovernanceValidator(master_data)
-    result = validator.validate_user_governance()
-    
-    # Importación local para evitar dependencias circulares
-    from core.models import Finding
-    return [Finding(
-        domain=result['domain'],
-        title=result['title'],
-        score=result['score'],
-        observation=result['observation']
-    )]
+    return [validator.validate_user_governance()]

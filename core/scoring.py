@@ -1,31 +1,25 @@
+# VERSION: 5.1.1-FINAL
 """
-PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.1.3
 LAYER: Core / Scoring
-DESCRIPTION: Maturity engine with Contextual Override logic.
-AUTHOR: Senior Software Architect
+DESCRIPTION: Robust maturity calculation engine.
 """
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict
 from core.models import Finding
 
-def calculate_maturity(findings: List[Finding], context: Optional[Dict] = None) -> Tuple[Dict[int, float], float]:
+def calculate_maturity(findings: List[Finding], context: Dict = None):
+    # Base de madurez perfecta (5.0) para cada dominio
     domain_scores = {1: 5.0, 2: 5.0, 3: 5.0, 4: 5.0, 5: 5.0, 6: 5.0}
-    context = context or {}
-    is_maintenance = context.get('maintenance_windows', False)
     
     for f in findings:
-        if f.domain in domain_scores:
-            # Lógica de Override Contextual (v5.1.3)
-            if is_maintenance and f.domain in [2, 4] and f.score > 2.0:
-                f.override_score = 1.0
-                f.observation = f"[OVERRIDE MANTENIMIENTO] {f.observation}"
-            
-            penalty = f.override_score if f.override_score is not None else f.score
+        # Validamos que f sea un objeto Finding y tenga el atributo domain
+        if hasattr(f, 'domain') and f.domain in domain_scores:
+            # Restamos la penalización del hallazgo
+            penalty = f.score if getattr(f, 'override_score', None) is None else f.override_score
             domain_scores[f.domain] -= penalty
     
-    # Normalización de límites
+    # Normalizar entre 1.0 y 5.0
     for domain in domain_scores:
         domain_scores[domain] = max(1.0, min(5.0, domain_scores[domain]))
-    
+        
     global_score = sum(domain_scores.values()) / len(domain_scores)
     return domain_scores, global_score
