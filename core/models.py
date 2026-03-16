@@ -1,7 +1,7 @@
-# VERSION: 5.3.3-FINAL
+# VERSION: 5.3.4-FINAL
 """
 PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.3.3
+VERSION: 5.3.4
 LAYER: Core / Models
 DESCRIPTION: Universal Golden Model. Supports metrics, confidence and metadata.
 AUTHOR: Senior Software Architect

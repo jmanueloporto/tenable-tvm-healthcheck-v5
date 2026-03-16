@@ -1,4 +1,4 @@
-# VERSION: 5.3.3-FINAL
+# VERSION: 5.3.4-FINAL
 """
 LAYER: Core / Scoring
 DESCRIPTION: Robust maturity calculation engine.

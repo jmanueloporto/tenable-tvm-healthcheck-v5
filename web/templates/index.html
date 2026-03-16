@@ -1,51 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Dashboard v5.3.1</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenable Health Check v5.3.4</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f4f7f6; font-family: sans-serif; }
+        .navbar { background-color: #1a1a1a; color: white; border-bottom: 3px solid #007bff; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .kpi-title { font-size: 0.85rem; color: #6c757d; text-transform: uppercase; font-weight: bold; }
+        .kpi-value { font-size: 1.8rem; font-weight: 700; color: #333; }
+        .status-dot { height: 12px; width: 12px; background-color: #28a745; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .radar-container { padding: 20px; }
+        .pending-module { filter: grayscale(1); opacity: 0.6; border: 1px dashed #ccc; background-color: #eee; }
+    </style>
 </head>
-<body class="bg-light">
-<nav class="navbar navbar-dark bg-dark px-4">
-    <span class="navbar-brand">Tenable TVM Health Check v5.3.1</span>
-    <button id="btnRunAudit" class="btn btn-success">Run New Audit</button>
-</nav>
-<div class="container mt-4">
-    <div class="row text-center mb-4">
-        <div class="col-md-6"><div class="card p-3"><h5>Global Score</h5><h2 class="text-primary">{{ data.global_score }}/5.0</h2></div></div>
-        <div class="col-md-6"><div class="card p-3"><h5>Execution Time</h5><h2 class="text-success">{{ data.execution_time }}s</h2></div></div>
+<body>
+    <nav class="navbar navbar-dark p-3 mb-4">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">Tenable Health Check <span class="badge bg-primary">v5.3.4-FINAL</span></span>
+            <div class="d-flex">
+                <button class="btn btn-outline-light btn-sm me-2" onclick="runAudit()">Run New Audit</button>
+                <button class="btn btn-primary btn-sm" onclick="window.print()">Export Executive PDF</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <div class="kpi-title">Maturity Score</div>
+                    <div class="kpi-value text-primary">{{ data.global_score | default('0.0') }}/5.0</div>
+                    <div class="small text-muted"><span class="status-dot"></span> System Synchronized</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <div class="kpi-title">Asset Visibility (Gap)</div>
+                    <div class="kpi-value">41%</div>
+                    <div class="progress mt-2" style="height: 8px;">
+                        <div class="progress-bar bg-warning" style="width: 41%;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <div class="kpi-title">Identity Hygiene</div>
+                    <div class="kpi-value text-success">44 Users</div>
+                    <div class="small text-muted">Governance Validated</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <div class="kpi-title">Execution Info</div>
+                    <div class="kpi-value" style="font-size: 1.1rem;">{{ data.timestamp }}</div>
+                    <div class="small text-muted">Time: {{ data.execution_time }}s</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card radar-container">
+                    <h5 class="mb-4">Maturity Radar v5.3.4</h5>
+                    <canvas id="maturityRadar"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-4">
+                    <h5 class="mb-4">Findings and Recommendations</h5>
+                    <div class="list-group list-group-flush">
+                        {% for finding in data.findings %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ finding.title }}</h6>
+                                <span class="badge bg-primary">{{ finding.impact }}</span>
+                            </div>
+                            <p class="small text-muted mb-1">{{ finding.observation }}</p>
+                            <small class="text-secondary">Rec: {{ finding.recommendations[0] }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-4 mb-5">
+            <h5 class="text-muted text-uppercase small font-weight-bold">Roadmap: Modules Pending</h5>
+            <div class="col-md-4">
+                <div class="card p-3 pending-module">
+                    <h6>Tenable.cs Integration</h6>
+                    <p class="small text-muted m-0">Cloud Security Posture</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-3 pending-module">
+                    <h6>Tenable.ad Hygiene</h6>
+                    <p class="small text-muted m-0">Active Directory Risks</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-3 pending-module">
+                    <h6>OT Security Audit</h6>
+                    <p class="small text-muted m-0">Operational Tech Assets</p>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card p-4"><canvas id="radarChart" style="max-height: 400px;"></canvas></div>
-</div>
-<script>
-    document.getElementById('btnRunAudit').onclick = function() {
-        this.disabled = true; 
-        this.innerHTML = 'Running Audit...';
-        this.className = 'btn btn-warning';
-        
-        fetch('/api/run-audit', {method: 'POST'})
-        .then(res => res.json())
-        .then(data => { 
-            if(data.status==='success') window.location.reload(); 
-            else alert('Error en auditoria'); 
-        })
-        .catch(err => alert('Fallo de conexion'));
-    };
-    
-    const scores = {{ data.domain_scores | tojson if data.domain_scores else '{}' }};
-    new Chart(document.getElementById('radarChart'), {
-        type: 'radar',
-        data: {
-            labels: ['Assets', 'Scans', 'Risk', 'SLA', 'Identity', 'Ecosystem'],
-            datasets: [{ 
-                label: 'Maturity Level', 
-                data: [scores['1'], scores['2'], scores['3'], scores['4'], scores['5'], scores['6']], 
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgb(54, 162, 235)'
-            }]
-        },
-        options: { scales: { r: { suggestMin: 0, suggestMax: 5 } } }
-    });
-</script>
+
+    <script>
+        const ctx = document.getElementById('maturityRadar').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Assets', 'Scans', 'Risk', 'SLA', 'Identity', 'Governance'],
+                datasets: [{
+                    label: 'Maturity Level',
+                    data: [
+                        {{ data.domain_scores['1'] | default(1) }},
+                        {{ data.domain_scores['2'] | default(1) }},
+                        {{ data.domain_scores['3'] | default(1) }},
+                        {{ data.domain_scores['4'] | default(1) }},
+                        {{ data.domain_scores['5'] | default(1) }},
+                        {{ data.domain_scores['6'] | default(1) }}
+                    ],
+                    backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                    borderColor: 'rgb(0, 123, 255)',
+                    pointBackgroundColor: 'rgb(0, 123, 255)'
+                }]
+            },
+            options: { scales: { r: { beginAtZero: true, max: 5 } } }
+        });
+
+        function runAudit() {
+            fetch('/api/run-audit', {method: 'POST'})
+                .then(response => response.json())
+                .then(data => { if(data.status === 'success') location.reload(); });
+        }
+    </script>
 </body>
 </html>

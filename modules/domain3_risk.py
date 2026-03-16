@@ -1,7 +1,7 @@
-# VERSION: 5.3.3-FINAL
+# VERSION: 5.3.4-FINAL
 """
 PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.3.3
+VERSION: 5.3.4
 LAYER: Business / Modules
 DESCRIPTION: Re-engineered Domain 3 (Risk Prioritization & Analysis).
              Focuses on Vuln Density, VPR Adoption, and Aging.
