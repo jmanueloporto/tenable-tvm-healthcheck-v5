@@ -11,8 +11,8 @@
             },
             "Nessus Agents": {
                 "qty": 12,
-                "active": 3,
-                "inactive": 9
+                "active": 4,
+                "inactive": 8
             },
             "Nessus Network Monitors": {
                 "qty": 7,
@@ -299,7 +299,7 @@
                 "name": "MPIV-DG",
                 "label": "Nessus Agents",
                 "raw_type": "agent",
-                "status": "off"
+                "status": "on"
             },
             {
                 "name": "MPIV-JM",
@@ -343,7 +343,7 @@
         "total": 9
     },
     "vulnerabilities": {
-        "total": 544
+        "total": 543
     },
     "users": {
         "total": 44
