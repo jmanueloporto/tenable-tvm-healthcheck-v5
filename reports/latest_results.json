@@ -1,33 +1,355 @@
 {
-    "timestamp": "2026-03-13T14:50:59.319921",
-    "execution_time": 0.0,
-    "global_score": 4.0,
-    "domain_scores": {
-        "1": 1.0,
-        "2": 5.0,
-        "3": 4.0,
-        "4": 4.0,
-        "5": 5.0,
-        "6": 5.0
+    "sensors": {
+        "summary": {
+            "total": 50
+        },
+        "stats_by_type": {
+            "Nessus Scanners": {
+                "qty": 28,
+                "active": 18,
+                "inactive": 10
+            },
+            "Nessus Agents": {
+                "qty": 12,
+                "active": 3,
+                "inactive": 9
+            },
+            "Nessus Network Monitors": {
+                "qty": 7,
+                "active": 0,
+                "inactive": 7
+            },
+            "OT Connectors": {
+                "qty": 0,
+                "active": 0,
+                "inactive": 0
+            },
+            "Web Application Scanners": {
+                "qty": 3,
+                "active": 0,
+                "inactive": 3
+            }
+        },
+        "inventory": [
+            {
+                "name": "US Cloud Scanner",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "ip-10-0-0-30.ec2.internal",
+                "label": "Nessus Scanners",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "EU Frankfurt Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "US East Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "AP Singapore Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "New",
+                "label": "Nessus Network Monitors",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "TenableCoreNNMTio",
+                "label": "Nessus Network Monitors",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "Ireland Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "DESKTOP-E7G4N40",
+                "label": "Nessus Scanners",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "US West Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "was-scanner-AWS-5319",
+                "label": "Web Application Scanners",
+                "raw_type": "managed_webapp",
+                "status": "off"
+            },
+            {
+                "name": "NNM-Heroinas",
+                "label": "Nessus Network Monitors",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "Test Scanner Group",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "NNM LASO",
+                "label": "Nessus Network Monitors",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "was-scanner-4825-Heroinas",
+                "label": "Web Application Scanners",
+                "raw_type": "managed_webapp",
+                "status": "off"
+            },
+            {
+                "name": "TenableNessus-AzureNV",
+                "label": "Nessus Scanners",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "AP Tokyo Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "EMEA Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "Brazil Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "tenable-gfx-NS-t.io",
+                "label": "Nessus Scanners",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "CA Central Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "JUME-NNM",
+                "label": "Nessus Network Monitors",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "tenable-29mw6w0a",
+                "label": "Nessus Scanners",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "tenable-3n5mkcbq",
+                "label": "Nessus Scanners",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "V2 NNM Test",
+                "label": "Nessus Network Monitors",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "UK Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "AP Sydney Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "Nessus-T.io-GFx",
+                "label": "Nessus Scanners",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "NNM test Daniel",
+                "label": "Nessus Network Monitors",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "UK London Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "APAC Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "NS Tsc-Tio",
+                "label": "Nessus Scanners",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "EU Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "mpiv-NS",
+                "label": "Nessus Scanners",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "India Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "UAE Cloud Scanners",
+                "label": "Nessus Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "mpiv-WAS",
+                "label": "Web Application Scanners",
+                "raw_type": "managed_webapp",
+                "status": "off"
+            },
+            {
+                "name": "ip-172-31-24-65",
+                "label": "Nessus Scanners",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "DESKTOP-K3MR5T3",
+                "label": "Nessus Agents",
+                "raw_type": "agent",
+                "status": "off"
+            },
+            {
+                "name": "DESKTOP-MMLHIU2",
+                "label": "Nessus Agents",
+                "raw_type": "agent",
+                "status": "off"
+            },
+            {
+                "name": "INSTANCE-202410",
+                "label": "Nessus Agents",
+                "raw_type": "agent",
+                "status": "off"
+            },
+            {
+                "name": "jume-X441UAK",
+                "label": "Nessus Agents",
+                "raw_type": "agent",
+                "status": "off"
+            },
+            {
+                "name": "Mis-MacBook-Pro.local",
+                "label": "Nessus Agents",
+                "raw_type": "agent",
+                "status": "off"
+            },
+            {
+                "name": "mpiv-DC",
+                "label": "Nessus Agents",
+                "raw_type": "agent",
+                "status": "off"
+            },
+            {
+                "name": "MPIV-DG",
+                "label": "Nessus Agents",
+                "raw_type": "agent",
+                "status": "off"
+            },
+            {
+                "name": "MPIV-JM",
+                "label": "Nessus Agents",
+                "raw_type": "agent",
+                "status": "on"
+            },
+            {
+                "name": "MPIV-JO-WIN",
+                "label": "Nessus Agents",
+                "raw_type": "agent",
+                "status": "on"
+            },
+            {
+                "name": "MPIV-JS",
+                "label": "Nessus Agents",
+                "raw_type": "agent",
+                "status": "on"
+            },
+            {
+                "name": "MPIV-NV",
+                "label": "Nessus Agents",
+                "raw_type": "agent",
+                "status": "off"
+            },
+            {
+                "name": "TENA000289.local",
+                "label": "Nessus Agents",
+                "raw_type": "agent",
+                "status": "off"
+            }
+        ]
     },
-    "findings": [
-        {
-            "title": "Critical Risk: Shadow IT Gap",
-            "domain": 1,
-            "score": 5.0,
-            "observation": "Brecha de visibilidad del 100.0% detectada. Expected: 100 | Detected: 0 | Gap: 100"
-        },
-        {
-            "title": "Insufficient Data for Risk Analysis",
-            "domain": 3,
-            "score": 1.0,
-            "observation": "No assets found to calculate vulnerability density."
-        },
-        {
-            "title": "SLA Compliance: Healthy Status",
-            "domain": 4,
-            "score": 1.0,
-            "observation": "No se detectaron vulnerabilidades Criticas que superen el SLA de 15 dias."
-        }
-    ]
+    "assets": {
+        "total": 12
+    },
+    "scans": {
+        "total": 608
+    },
+    "policies": {
+        "total": 9
+    },
+    "vulnerabilities": {
+        "total": 544
+    },
+    "users": {
+        "total": 44
+    },
+    "audit_logs": {
+        "total": 0,
+        "status": "Forbidden"
+    }
 }

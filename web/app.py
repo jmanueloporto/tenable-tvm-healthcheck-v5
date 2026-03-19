@@ -1,3 +1,4 @@
+""" VERSION: 5.4.0 | STATUS: Stable """
 # VERSION: 5.3.4-FINAL
 from flask import Flask, render_template, jsonify
 import json

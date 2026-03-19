@@ -1,3 +1,4 @@
+""" VERSION: 5.4.0 | STATUS: Stable """
 # VERSION: 5.3.4-FINAL-ADJUSTED
 from core.models import Finding
 from typing import List, Dict, Any

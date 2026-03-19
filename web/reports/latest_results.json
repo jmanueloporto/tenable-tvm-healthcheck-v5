@@ -1,121 +1,347 @@
 {
-    "timestamp": "2026-03-11T21:19:13.947291",
-    "execution_time": 12.21,
-    "global_score": 2.25,
-    "domain_scores": {
-        "1": 1.5,
-        "2": 1.0,
-        "3": 4.0,
-        "4": 1.0,
-        "5": 1.0,
-        "6": 5.0
+    "sensors": {
+        "summary": {
+            "total": 52
+        },
+        "stats_by_type": {
+            "Nessus Scanners": {
+                "qty": 29,
+                "active": 19,
+                "inactive": 10
+            },
+            "Nessus Agents": {
+                "qty": 12,
+                "active": 3,
+                "inactive": 9
+            },
+            "Nessus Network Monitors": {
+                "qty": 7,
+                "active": 0,
+                "inactive": 7
+            },
+            "OT Connectors": {
+                "qty": 1,
+                "active": 1,
+                "inactive": 0
+            },
+            "Web Application Scanners": {
+                "qty": 3,
+                "active": 0,
+                "inactive": 3
+            }
+        },
+        "raw_discovery": {
+            "local": {
+                "qty": 18,
+                "active": 18,
+                "inactive": 0
+            },
+            "managed": {
+                "qty": 10,
+                "active": 0,
+                "inactive": 10
+            },
+            "active_directory": {
+                "qty": 9,
+                "active": 0,
+                "inactive": 9
+            },
+            "managed_pvs": {
+                "qty": 7,
+                "active": 0,
+                "inactive": 7
+            },
+            "pool": {
+                "qty": 5,
+                "active": 5,
+                "inactive": 0
+            },
+            "managed_webapp": {
+                "qty": 3,
+                "active": 0,
+                "inactive": 3
+            }
+        },
+        "full_list": [
+            {
+                "name": "US Cloud Scanner",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "ip-10-0-0-30.ec2.internal",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "EU Frankfurt Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "7f83424c-f596-4a15-b1eb-ce675e34c2a3-1354d28e-f9ef-440c-b00e-fe1894826e01",
+                "raw_type": "active_directory",
+                "status": "off"
+            },
+            {
+                "name": "cbc3a0bb-1d57-451c-9a89-1cdbb7108539-8b393251-ed3c-4ce7-a566-a0a27872265f",
+                "raw_type": "active_directory",
+                "status": "off"
+            },
+            {
+                "name": "US East Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "AP Singapore Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "New",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "TenableCoreNNMTio",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "Laboratorio NV",
+                "raw_type": "pool",
+                "status": "on"
+            },
+            {
+                "name": "Ireland Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "f6de0256-3e4f-4207-9316-e9f1c97311a2-dc00b074-63b2-42e8-8ba3-176d60c51a14",
+                "raw_type": "active_directory",
+                "status": "off"
+            },
+            {
+                "name": "DESKTOP-E7G4N40",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "US West Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "was-scanner-AWS-5319",
+                "raw_type": "managed_webapp",
+                "status": "off"
+            },
+            {
+                "name": "NNM-Heroinas",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "Test Scanner Group",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "NNM LASO",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "was-scanner-4825-Heroinas",
+                "raw_type": "managed_webapp",
+                "status": "off"
+            },
+            {
+                "name": "TenableNessus-AzureNV",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "e35fc14a-9d6b-4c50-af5e-0dc08f54ccea-58c813d3-106a-4fb8-896e-f5455e4ab2ec",
+                "raw_type": "active_directory",
+                "status": "off"
+            },
+            {
+                "name": "03e71316-f714-4f23-be9b-5917150a02eb-1e7c8e4a-f5bb-4fe0-a2b5-cc44c1b9fd26",
+                "raw_type": "active_directory",
+                "status": "off"
+            },
+            {
+                "name": "AP Tokyo Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "e35fc14a-9d6b-4c50-af5e-0dc08f54ccea-ff2eafca-e2ba-4347-98b8-15c8481a351b",
+                "raw_type": "active_directory",
+                "status": "off"
+            },
+            {
+                "name": "fb85f891-37c8-441e-837a-6cfaed69c473",
+                "raw_type": "active_directory",
+                "status": "off"
+            },
+            {
+                "name": "EMEA Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "Prueba",
+                "raw_type": "pool",
+                "status": "on"
+            },
+            {
+                "name": "Brazil Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "tenable-gfx-NS-t.io",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "bde317e5-54e5-4ed8-ac63-33763f2f54c4-1e6e93f2-b4b5-46cb-afab-5a1565c1c950",
+                "raw_type": "active_directory",
+                "status": "off"
+            },
+            {
+                "name": "Sven Heroinas",
+                "raw_type": "pool",
+                "status": "on"
+            },
+            {
+                "name": "CA Central Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "JUME-NNM",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "tenable-29mw6w0a",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "tenable-3n5mkcbq",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "V2 NNM Test",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "UK Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "AP Sydney Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "Nessus-T.io-GFx",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "955d0053-9c83-42aa-ba57-752f98fcf20e-f5d62350-afcc-425d-b093-2a4fddb7cf36",
+                "raw_type": "active_directory",
+                "status": "off"
+            },
+            {
+                "name": "NNM test Daniel",
+                "raw_type": "managed_pvs",
+                "status": "off"
+            },
+            {
+                "name": "UK London Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "Headquarters-NV",
+                "raw_type": "pool",
+                "status": "on"
+            },
+            {
+                "name": "APAC Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "NS Tsc-Tio",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "EU Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "mpiv-NS",
+                "raw_type": "managed",
+                "status": "off"
+            },
+            {
+                "name": "Test",
+                "raw_type": "pool",
+                "status": "on"
+            },
+            {
+                "name": "India Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "UAE Cloud Scanners",
+                "raw_type": "local",
+                "status": "on"
+            },
+            {
+                "name": "mpiv-WAS",
+                "raw_type": "managed_webapp",
+                "status": "off"
+            },
+            {
+                "name": "ip-172-31-24-65",
+                "raw_type": "managed",
+                "status": "off"
+            }
+        ]
     },
-    "findings": [
-        {
-            "title": "Stale Asset Inventory",
-            "domain": 1,
-            "domain_name": "Asset Visibility",
-            "score": 1.0,
-            "observation": "Stale assets detected: 31",
-            "recommendations": [
-                "Decommission or rescan stale assets"
-            ]
-        },
-        {
-            "title": "Missing Cloud Connectors",
-            "domain": 1,
-            "domain_name": "Asset Visibility",
-            "score": 2.5,
-            "observation": "No Cloud Connectors detected.",
-            "recommendations": [
-                "Configure AWS/Azure/GCP connectors"
-            ]
-        },
-        {
-            "title": "Low Credentialed Scan Coverage",
-            "domain": 2,
-            "domain_name": "Scanning Operations",
-            "score": 1.0,
-            "observation": "Authenticated scan rate is 61.5%. (24/39 assets).",
-            "recommendations": [
-                "Configure scan credentials or deploy agents"
-            ]
-        },
-        {
-            "title": "Scanning Frequency Gap",
-            "domain": 2,
-            "domain_name": "Scanning Operations",
-            "score": 1.0,
-            "observation": "Assets not scanned in 30 days (30): Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown, Unknown",
-            "recommendations": [
-                "Increase scan frequency to at least every 30 days"
-            ]
-        },
-        {
-            "title": "Lack of Scan Customization",
-            "domain": 2,
-            "domain_name": "Scanning Operations",
-            "score": 2.5,
-            "observation": "0 custom policies detected. Environment relies entirely on default Tenable templates.",
-            "recommendations": [
-                "Create custom scan policies for optimized vulnerability detection"
-            ]
-        },
-        {
-            "title": "Critical Vulnerability Aging",
-            "domain": 3,
-            "domain_name": "Risk Prioritization",
-            "score": 1.0,
-            "observation": "Critical vulnerabilities older than 30 days (3): Node.js 20.x < 20.20.0 / 22.x , Microsoft .NET Core SEoL, Tenable Log Correlation Engine",
-            "recommendations": [
-                "Enforce stricter SLAs for 'Critical' severity findings to stay under 30 days."
-            ]
-        },
-        {
-            "title": "Critical Risk: SLA Breach Detected",
-            "domain": 4,
-            "domain_name": "Remediation & SLA",
-            "score": 5.0,
-            "observation": "Se detectaron 3 vulnerabilidades Criticas abiertas que superan el SLA interno de 30 dias.",
-            "recommendations": [
-                "Priorizar la remediacion de los 3 hallazgos fuera de SLA",
-                "Revisar cuellos de botella en el proceso de parcheo",
-                "Validar si los activos afectados requieren ventanas de mantenimiento urgentes"
-            ]
-        },
-        {
-            "title": "Consolidated Brute Force Alert",
-            "domain": 5,
-            "domain_name": "Identity Hygiene",
-            "score": 1.0,
-            "observation": "N/A",
-            "recommendations": [
-                "Lock listed accounts",
-                "Force password reset",
-                "Review source logs"
-            ]
-        },
-        {
-            "title": "Bulk Stale Accounts (Zombies)",
-            "domain": 5,
-            "domain_name": "Identity Hygiene",
-            "score": 1.0,
-            "observation": "N/A",
-            "recommendations": [
-                "Deprovision listed users",
-                "Implement 90-day inactivity policy"
-            ]
-        },
-        {
-            "title": "Non-Federated Identity Risk (Local Users)",
-            "domain": 5,
-            "domain_name": "Identity Hygiene",
-            "score": 3.0,
-            "observation": "N/A",
-            "recommendations": [
-                "Migrate listed users to SAML/SSO",
-                "Enforce MFA for locals"
-            ]
-        }
-    ]
+    "assets": {
+        "total": 41
+    },
+    "scans": {
+        "total": 608
+    },
+    "policies": {
+        "total": 9
+    },
+    "vulnerabilities": {
+        "total": 66
+    },
+    "users": {
+        "total": 44
+    },
+    "audit_logs": {
+        "total": 0,
+        "status": "Forbidden"
+    }
 }

@@ -1,96 +1,98 @@
-# VERSION: 5.3.4-FINAL
-"""
-PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.3.4
-LAYER: Business / Modules
-DESCRIPTION: Generates findings for Domain 4 (Remediation & Response).
-             Analyzes MTTR, Fix Rates, and Effort Alignment.
-AUTHOR: Senior Software Architect
-"""
+""" VERSION: 5.4.0 | LAYER: Modules | STATUS: Stable | DESC: SLA Breach & MTTR Engine """
 
-from core.models import Finding
-from typing import List, Dict, Any
 from datetime import datetime
 
-def run_audit(master_data: Dict[str, Any]) -> List[Finding]:
-    """
-    Evaluates remediation velocity, coverage, and risk-based prioritization.
-    """
-    all_findings: List[Finding] = []
-    domain_id = 4
-    source_tag = "api"
+class RemediationAuditor:
+    def __init__(self, data):
+        self.data = data
+        self.config = data.get('config', {})
+        self.vulnerabilities = data.get('vulnerabilities', {}).get('list', [])
 
-    try:
-        vulns = master_data.get("vulns_raw", [])
-        if not isinstance(vulns, list) or not vulns:
-            return []
+    def parse_date(self, date_str):
+        try:
+            if not date_str:
+                return None
+            clean_str = date_str.replace('Z', '+00:00')
+            return datetime.fromisoformat(clean_str)
+        except Exception:
+            return None
 
-        # Categorización de datos para análisis
-        fixed_vulns = [v for v in vulns if v.get("state") == "fixed"]
-        open_vulns = [v for v in vulns if v.get("state") in ["open", "reopened"]]
+    def calculate_mttr(self):
+        fixed_vuls = [v for v in self.vulnerabilities if v.get('state', '').upper() == 'FIXED']
+        if not fixed_vuls:
+            return None
+
+        total_days = 0
+        valid_count = 0
+
+        for vuln in fixed_vuls:
+            first_found = vuln.get('first_found') or vuln.get('first_seen')
+            last_fixed = vuln.get('last_fixed') or vuln.get('last_seen')
+            
+            if first_found and last_fixed:
+                d1 = self.parse_date(first_found)
+                d2 = self.parse_date(last_fixed)
+                if d1 and d2:
+                    delta = (d2 - d1).days
+                    total_days += max(0, delta)
+                    valid_count += 1
         
-        # --- Finding 4.1: Remediation Velocity (MTTR) ---
-        ttr_days = []
-        for v in [fv for fv in fixed_vulns if fv.get("severity") == "critical"]:
-            try:
-                # Conversión de timestamps ISO a objetos datetime
-                first = datetime.fromisoformat(v['first_found'].replace('Z', '+00:00'))
-                last = datetime.fromisoformat(v['last_fixed'].replace('Z', '+00:00'))
-                ttr_days.append((last - first).days)
-            except (KeyError, ValueError):
-                continue
+        if valid_count == 0:
+            return None
+            
+        return total_days / valid_count
 
-        if ttr_days:
-            avg_ttr = sum(ttr_days) / len(ttr_days)
-            if avg_ttr > 30:
-                score = 1.0 if avg_ttr > 60 else 2.0
-                all_findings.append(Finding(
-                    title="Remediation SLA Breach (MTTR)",
-                    domain=domain_id, source=source_tag,
-                    metrics={"avg_ttr_critical_days": round(avg_ttr, 1)},
-                    score=score, confidence="High",
-                    recommendations=[f"Reduce Critical MTTR to < 30 days. Current: {round(avg_ttr, 1)}"]
-                ))
+    def run_audit(self):
+        findings = []
+        sla_limit = self.config.get('internal_sla_critical', 30) 
+        
+        # 1. Lógica Original: SLA Breach Detected
+        breaches = 0
+        for vuln in self.vulnerabilities:
+            if vuln.get('state', '').upper() in ['OPEN', 'ACTIVE', 'REOPENED']:
+                age = vuln.get('age', 0)
+                if age > sla_limit:
+                    breaches += 1
+                    
+        if breaches > 0:
+            findings.append({
+                "domain": 4,
+                "title": "SLA Breach Detected",
+                "override_score": 2.0,
+                "observation": f"Se detectaron {breaches} vulnerabilidades activas superando el SLA interno de {sla_limit} dias."
+            })
+        else:
+            findings.append({
+                "domain": 4,
+                "title": "SLA Breach Detected",
+                "override_score": 5.0,
+                "observation": "Todas las vulnerabilidades activas estan dentro de los tiempos aceptables del SLA."
+            })
 
-        # --- Finding 4.2: Remediation Coverage (Fix Rate) ---
-        crit_total = len([v for v in vulns if v.get("severity") == "critical"])
-        crit_fixed = len([v for v in fixed_vulns if v.get("severity") == "critical"])
-        high_total = len([v for v in vulns if v.get("severity") == "high"])
-        high_fixed = len([v for v in fixed_vulns if v.get("severity") == "high"])
-
-        fix_rate_crit = (crit_fixed / crit_total * 100) if crit_total > 0 else 100
-        fix_rate_high = (high_fixed / high_total * 100) if high_total > 0 else 100
-
-        if fix_rate_crit < 70 or fix_rate_high < 50:
-            all_findings.append(Finding(
-                title="Low Remediation Coverage",
-                domain=domain_id, source=source_tag,
-                metrics={"crit_fix_rate": f"{round(fix_rate_crit,1)}%", "high_fix_rate": f"{round(fix_rate_high,1)}%"},
-                score=2.0, confidence="High",
-                recommendations=["Focus patching efforts on Critical/High backlogs"]
-            ))
-
-        # --- Finding 4.3: Effort Misalignment (VPR vs Fix) ---
-        low_vpr_fixed = len([v for v in fixed_vulns if float(v.get("vpr_score", 0) or 0) < 4.0])
-        high_vpr_fixed = len([v for v in fixed_vulns if float(v.get("vpr_score", 0) or 0) >= 7.0])
-
-        if low_vpr_fixed > high_vpr_fixed and high_vpr_fixed > 0:
-            all_findings.append(Finding(
-                title="Inefficient Remediation Prioritization",
-                domain=domain_id, source=source_tag,
-                metrics={"low_vpr_fixed": low_vpr_fixed, "high_vpr_fixed": high_vpr_fixed},
-                score=2.0, confidence="Medium",
-                recommendations=["Redirect patching teams to address High VPR vulnerabilities first"]
-            ))
-
-    except Exception as e:
-        # Resiliencia Estricta v5.0.6
-        all_findings.append(Finding(
-            title="Module 4 Error",
-            domain=domain_id, source="system",
-            metrics={"exception": str(e)},
-            score=1.0, confidence="High",
-            recommendations=["Review API data structure and date formats in domain4_remediation.py"]
-        ))
-
-    return all_findings
+        # 2. Nueva Lógica: MTTR Engine
+        mttr_days = self.calculate_mttr()
+        
+        if mttr_days is None:
+            findings.append({
+                "domain": 4,
+                "title": "SLA Performance: Global MTTR",
+                "override_score": 3.0,
+                "observation": "No hay suficientes vulnerabilidades en estado FIXED con fechas validas para calcular un MTTR historico."
+            })
+        else:
+            if mttr_days > sla_limit:
+                findings.append({
+                    "domain": 4,
+                    "title": "SLA Performance: Global MTTR",
+                    "override_score": 2.0,
+                    "observation": f"El MTTR global es de {mttr_days:.1f} dias, superando el limite establecido del SLA ({sla_limit} dias)."
+                })
+            else:
+                findings.append({
+                    "domain": 4,
+                    "title": "SLA Performance: Global MTTR",
+                    "override_score": 5.0,
+                    "observation": f"Excelente tiempo de respuesta. El MTTR global es de {mttr_days:.1f} dias, operando dentro del SLA."
+                })
+                
+        return findings
