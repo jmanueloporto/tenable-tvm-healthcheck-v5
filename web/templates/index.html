@@ -2,157 +2,49 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tenable Health Check v5.3.4</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Tenable Dashboard v5.4.2</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
     <style>
-        body { background-color: #f8f9fa; font-family: sans-serif; }
-        .navbar { background-color: #0d1117; color: white; border-bottom: 2px solid #30363d; }
-        .card { border: 1px solid #d0d7de; border-radius: 8px; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-        .kpi-title { font-size: 0.7rem; color: #57606a; text-transform: uppercase; font-weight: 600; }
-        .kpi-value { font-size: 1.6rem; font-weight: 700; color: #24292f; }
-        .radar-container { padding: 20px; height: 350px; }
-        .pending-card { background-color: #f6f8fa; border: 1px dashed #afb8c1; opacity: 0.7; }
-        .badge-domain { font-size: 0.65rem; padding: 4px 8px; }
+        body { background-color: #001220; color: white; font-family: sans-serif; }
+        .card { background-color: #00233d; border: none; border-radius: 10px; margin-bottom: 20px; }
+        .kpi { font-size: 2.5rem; font-weight: bold; color: #00a3e0; }
+        .btn-audit { background-color: #00a3e0; color: white; font-weight: bold; border: none; }
+        .table { color: white; }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark p-3 mb-4">
-        <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">Tenable Health Check <span class="badge bg-secondary ms-2">v5.3.4-FINAL</span></span>
-            <div class="d-flex">
-                <button id="btnRun" class="btn btn-outline-light btn-sm me-2" onclick="runAudit()">Run New Audit</button>
-                <button class="btn btn-primary btn-sm" onclick="window.print()">Export Executive PDF</button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container-fluid px-4">
-        <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="card p-3">
-                    <div class="kpi-title">Maturity Score</div>
-                    <div class="kpi-value text-primary">{{ data.global_score | default('4.0') }}/5.0</div>
-                    <div class="small text-success">● System Operational</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card p-3">
-                    <div class="kpi-title">Asset Visibility</div>
-                    <div class="kpi-value">41%</div>
-                    <div class="progress mt-2" style="height: 6px;"><div class="progress-bar bg-warning" style="width: 41%;"></div></div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card p-3">
-                    <div class="kpi-title">Identity Hygiene</div>
-                    <div class="kpi-value text-success">44 Users</div>
-                    <div class="small text-muted">Governance Validated</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card p-3">
-                    <div class="kpi-title">Audit Timestamp</div>
-                    <div class="kpi-value" style="font-size: 0.9rem; padding-top: 8px;">{{ data.timestamp }}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-3 mb-4">
-            <div class="col-lg-6">
-                <div class="card p-4">
-                    <h6 class="kpi-title mb-4">Strategic Maturity Radar</h6>
-                    <div class="radar-container"><canvas id="maturityRadar"></canvas></div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card p-4">
-                    <h6 class="kpi-title mb-4">Audit Findings (Domain 1-6)</h6>
-                    <div class="overflow-auto" style="max-height: 350px;">
-                        {% for finding in data.findings %}
-                        <div class="mb-3 p-2 border-start border-primary border-3 bg-light rounded shadow-sm">
-                            <div class="d-flex justify-content-between">
-                                <span class="fw-bold small">{{ finding.title }}</span>
-                                <span class="badge bg-dark badge-domain">D{{ finding.domain }}</span>
-                            </div>
-                            <div class="small text-muted">{{ finding.observation }}</div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-3 mb-5 text-center">
-            <div class="col-12"><h6 class="kpi-title mb-3">Roadmap: Modules Pending Integration</h6></div>
-            <div class="col-md-4">
-                <div class="card p-3 pending-card">
-                    <div class="fw-bold small">Tenable.cs (Cloud)</div>
-                    <p class="small text-muted m-0">Infrastucture Posture Scan</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-3 pending-card">
-                    <div class="fw-bold small">Tenable.ad (Active Directory)</div>
-                    <p class="small text-muted m-0">Attack Path Management</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-3 pending-card">
-                    <div class="fw-bold small">OT Security</div>
-                    <p class="small text-muted m-0">Critical Asset Visibility</p>
-                </div>
-            </div>
-        </div>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Tenable TVM HealthCheck</h2>
+        <button id="runBtn" class="btn btn-audit px-4" onclick="runAudit()">RUN NEW AUDIT</button>
     </div>
-
-    <script>
-        const ctx = document.getElementById('maturityRadar').getContext('2d');
-        new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: ['Assets', 'Scans', 'Risk', 'Remediation', 'Identity', 'Governance'],
-                datasets: [{
-                    label: 'Current State',
-                    data: [
-                        {{ data.domain_scores['1'] | default(4.0) }},
-                        {{ data.domain_scores['2'] | default(1.0) }},
-                        {{ data.domain_scores['3'] | default(4.0) }},
-                        {{ data.domain_scores['4'] | default(5.0) }},
-                        {{ data.domain_scores['5'] | default(5.0) }},
-                        {{ data.domain_scores['6'] | default(5.0) }}
-                    ],
-                    backgroundColor: 'rgba(9, 105, 218, 0.2)',
-                    borderColor: '#0969da',
-                    borderWidth: 2
-                }]
-            },
-            options: { scales: { r: { beginAtZero: true, max: 5, ticks: { display: false } } }, plugins: { legend: { display: false } }, maintainAspectRatio: false }
-        });
-
-        function runAudit() {
-            const btn = document.getElementById('btnRun');
-            btn.disabled = true;
-            btn.innerText = "Running...";
-            
-            fetch('/api/run-audit', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if(data.status === 'success') {
-                        location.reload();
-                    } else {
-                        alert("Error: " + data.message);
-                        btn.disabled = false;
-                        btn.innerText = "Run New Audit";
-                    }
-                })
-                .catch(err => {
-                    alert("Network Error");
-                    btn.disabled = false;
-                    btn.innerText = "Run New Audit";
-                });
-        }
-    </script>
+    <div class="row text-center">
+        <div class="col-md-4"><div class="card p-3"><div>ACTIVOS</div><div class="kpi">{{ data.assets.total if data.assets else '0' }}</div></div></div>
+        <div class="col-md-4"><div class="card p-3"><div>VULNERABILIDADES</div><div class="kpi text-danger">{{ data.vulnerabilities.total if data.vulnerabilities else '0' }}</div></div></div>
+        <div class="col-md-4"><div class="card p-3"><div>SENSORES</div><div class="kpi text-success">{{ data.sensors.summary.total if data.sensors else '0' }}</div></div></div>
+    </div>
+    <div class="card p-4">
+        <h5>Resumen Operativo de Sensores</h5>
+        <table class="table">
+            <thead><tr><th>Tipo</th><th>Total</th><th>Activos</th><th>Inactivos</th></tr></thead>
+            <tbody>
+                {% if data.sensors and data.sensors.stats_by_type %}
+                {% for type, stats in data.sensors.stats_by_type.items() %}
+                <tr><td>{{ type }}</td><td>{{ stats.qty }}</td><td class="text-success">{{ stats.active }}</td><td class="text-danger">{{ stats.inactive }}</td></tr>
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    function runAudit() {
+        const btn = document.getElementById('runBtn');
+        btn.innerText = "RUNNING..."; btn.disabled = true;
+        fetch('/api/run-audit', { method: 'POST' })
+            .then(() => { alert('Audit Done!'); location.reload(); })
+            .catch(() => { alert('Error!'); btn.disabled = false; btn.innerText = "RUN NEW AUDIT"; });
+    }
+</script>
 </body>
 </html>

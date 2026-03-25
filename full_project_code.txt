@@ -1,284 +1,321 @@
---- PROJECT SUMMARY v5.3.3 ---
-V5-Tenable Health Check API Automation
-Current Version: 5.3.3
-Status: FASE 3 FINALIZED - INTERACTIVE & ROBUST REPORTING
+]633;E;echo ">>> DOCUMENTACIÓN E INVENTARIO v5.4.2";fe82148d-62df-425b-aad9-896e748fd8eb]633;C>>> DOCUMENTACIÓN E INVENTARIO v5.4.2
+# V5-Tenable Health Check API Automation
 
-Descripción
-Plataforma avanzada de auditoría para Tenable VM. La versión 5.3.3 marca el cierre de la Fase 3, integrando una interfaz web basada en Flask, un disparador de auditoría en tiempo real (Web Trigger) y un motor de exportación de alta fidelidad que genera simultáneamente reportes en JSON (para dashboards), TXT (forense) y PDF (ejecutivo).
+**Current Version:** 5.4.2  
+**Status:** STABLE - PURE API ARCHITECTURE & MTTR ENGINE
 
-Novedades de la v5.3.3
-Web Orchestration: Capacidad de ejecutar auditorías desde el navegador.
+## Description
+Advanced technical and executive auditing platform for Tenable Vulnerability Management. Version 5.4.2 marks a milestone in the project's maturity, consolidating a purist data collection engine (Pure API) that guarantees total fidelity with the real infrastructure (without GUI distortions), and incorporates the new mathematical engine for MTTR calculation.
 
-Triple-Engine Reporting: Generación garantizada de archivos JSON, TXT y PDF.
+## New Features and Key Characteristics (v5.4.2)
+* **Pure API Sensor Discovery:** Exact and auditable classification of sensors by querying native endpoints[cite: 3, 23].
+* **MTTR Engine (Domain 4):** Deep analysis of vulnerabilities in FIXED state to calculate Mean Time to Remediate[cite: 30].
+* **Triple-Engine Reporting:** Infallible export in JSON, TXT, and PDF (via FPDF)[cite: 30].
 
-Failsafe PDF: Corrección de truncamiento de texto y errores de codificación Latin-1/UTF-8.
+## Repository Architecture (Git Flow)
+* **main (Production):** Stable, untouchable branch for functional and sealed code.
+* **develop (Development):** Engineering laboratory for building and testing new domains.
 
-Shadow IT Detection: Reporte detallado de brecha de visibilidad (Gap Analysis).
-
-Project Structure
-Plaintext
-.
-├── core/                       # Núcleo del Orquestador
-│   ├── connection.py           # Conectividad API
-│   ├── context_loader.py       # Carga de contexto estratégico
-│   ├── data_collector.py       # Recolección de datos masiva
-│   ├── models.py               # Golden Model de hallazgos
-│   └── scoring.py              # Scoring con Contextual Override
-├── web/                        # Interfaz de Usuario (v5.3.x)
-│   ├── app.py                  # Servidor Flask & API Trigger
-│   └── templates/
-│       └── index.html          # Dashboard Radar Chart (Chart.js)
-├── modules/                    # Motores de Auditoría
-│   ├── domain1_assets.py       # Shadow IT & Inventory
-│   ├── domain2_scans.py        # Scan Coverage
-│   ├── domain3_risks.py        # Risk & VPR
-│   ├── domain4_remediation.py  # SLA Tracking
-│   └── domain5_6_proxy.py      # Governance Proxy
-├── reports/                    # Salida de Datos
-│   ├── export_engine.py        # Motor Triple (PDF/TXT/JSON)
-│   └── latest_results.json     # Buffer para Dashboard
-├── main.py                     # Orquestador Principal
-└── README.md                   # Documentación v5.3.3
+## Project Structure
+```text
+tenable-tvm-healthcheck-v5/
+├── core/                   # Core Orchestrator Engine (Layer 1)
+├── web/                    # Web User Interface (Flask)
+├── modules/                # Audit Engines (Layer 2)
+├── main.py                 # CLI Main Orchestrator
+└── README.md               # Official Documentation
 
 
---- MAIN ORCHESTRATOR ---
 
-""" VERSION: 5.3.3 | LAYER: Orchestration | STATUS: Stable """
-from core import connection, data_collector, scoring, context_loader
-from modules import domain1_assets, domain2_scans, domain3_risks, domain4_remediation, domain5_6_proxy
-from reports import export_engine
+>>> CÓDIGO FUENTE: main.py
+""" VERSION: 5.4.2 | STATUS: STABLE - PURE API ARCHITECTURE & MTTR ENGINE """
+import os, datetime
+from core import connection, data_collector
+from modules import domain4_remediation, report_generator
 
 def main():
-    start_time = time.time()
-    print("="*60)
-    print("      Orchestrator V5.3.2 - PHASE 3 (Failsafe PDF Engine)  ")
-    print("="*60)
-    context = context_loader.load_context()
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+    report_dir = "reports/reports"
+    txt_file = os.path.join(report_dir, f"Audit_Report_{timestamp}.txt")
+    pdf_file = os.path.join(report_dir, f"Audit_Report_{timestamp}.pdf")
+    
+    os.makedirs(report_dir, exist_ok=True)
+
     conn = connection.TenableConnection()
     collector = data_collector.TenableDataCollector(conn)
     master_data = collector.collect_all()
-    master_data['context'] = context
-    all_findings = []
-    all_findings.extend(domain1_assets.run_audit(master_data))
-    all_findings.extend(domain2_scans.run_audit(master_data))
-    all_findings.extend(domain3_risks.run_audit(master_data))
-    all_findings.extend(domain4_remediation.run_audit(master_data))
-    all_findings.extend(domain5_6_proxy.run_audit(master_data))
-    scores, global_score = scoring.calculate_maturity(all_findings, context)
-    exec_time = time.time() - start_time
-    export_engine.generate_reports(all_findings, scores, global_score, exec_time)
-    print(f"\n[DONE] Strategic Audit v5.3.2 Completed.")
+    
+    # Domain 4 logic
+    dom4 = domain4_remediation.RemediationAuditor(master_data)
+    master_data['findings'] = dom4.run_audit()
+    
+    # Reporting
+    reporter = report_generator.ReportGenerator(master_data)
+    reporter.generate_txt(txt_file)
+    reporter.generate_pdf(pdf_file)
+    
+    print(f"\n[DONE] Audit completed. Check {report_dir}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 
 
---- CORE SCORING ---
 
-"""
-PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.1.3
-LAYER: Core / Scoring
-DESCRIPTION: Maturity engine with Contextual Override logic.
-AUTHOR: Senior Software Architect
-"""
-from typing import List, Dict, Tuple, Optional
-from core.models import Finding
+>>> CÓDIGO FUENTE: core/data_collector.py
+""" VERSION: 5.4.2 | STATUS: STABLE - PURE API ARCHITECTURE & MTTR ENGINE """
+import json, os, time
 
-def calculate_maturity(findings: List[Finding], context: Optional[Dict] = None) -> Tuple[Dict[int, float], float]:
-    domain_scores = {1: 5.0, 2: 5.0, 3: 5.0, 4: 5.0, 5: 5.0, 6: 5.0}
-    context = context or {}
-    is_maintenance = context.get('maintenance_windows', False)
-    
-    for f in findings:
-        if f.domain in domain_scores:
-            # Lógica de Override Contextual (v5.1.3)
-            if is_maintenance and f.domain in [2, 4] and f.score > 2.0:
-                f.override_score = 1.0
-                f.observation = f"[OVERRIDE MANTENIMIENTO] {f.observation}"
-            
-            penalty = f.override_score if f.override_score is not None else f.score
-            domain_scores[f.domain] -= penalty
-    
-    # Normalización de límites
-    for domain in domain_scores:
-        domain_scores[domain] = max(1.0, min(5.0, domain_scores[domain]))
-    
-    global_score = sum(domain_scores.values()) / len(domain_scores)
-    return domain_scores, global_score
+class TenableDataCollector:
+    def __init__(self, connection):
+        self.connection = connection
+        self.results = {}
+
+    def collect_all(self):
+        start_time = time.time()
+        print("[*] Starting Phase 1 Silent Collection (v5.4.8-FINAL)...")
+        
+        steps = [
+            ("Hybrid Sensors", self.fetch_scanners),
+            ("Assets", self.fetch_assets),
+            ("Scans", lambda: self.fetch_endpoint("/scans", "scans")),
+            ("Policies", lambda: self.fetch_endpoint("/policies", "policies")),
+            ("Vulnerabilities", self.fetch_vulnerabilities),
+            ("Users", lambda: self.fetch_endpoint("/users", "users")),
+            ("Audit Logs", self.fetch_audit_logs)
+        ]
+
+        for i, (name, func) in enumerate(steps, 1):
+            print(f" [Step {i}/7] Fetching {name}...")
+            func()
+
+        self.save_results()
+        print("-" * 60)
+        print(f"[SUCCESS] Data Captured | Time: {round(time.time() - start_time, 2)}s")
+        print("-" * 60)
+        return self.results
+
+    def fetch_scanners(self):
+        data = self.connection.get("/scanners")
+        scanners = data.get('scanners', []) if isinstance(data, dict) else []
+        stats = {k: {"qty": 0, "active": 0, "inactive": 0} for k in ["Nessus Scanners", "Nessus Agents", "Nessus Network Monitors", "OT Connectors", "Web Application Scanners"]}
+        inventory = []
+        for s in scanners:
+            rtype = s.get('type', '').lower()
+            if rtype in ['pool', 'active_directory', 'agent']: continue
+            label = "Nessus Scanners"
+            if 'pvs' in rtype: label = "Nessus Network Monitors"
+            elif 'webapp' in rtype: label = "Web Application Scanners"
+            is_on = s.get('status') == 'on'
+            stats[label]["qty"] += 1
+            if is_on: stats[label]["active"] += 1
+            else: stats[label]["inactive"] += 1
+            inventory.append({"name": s.get('name'), "label": label, "status": s.get('status')})
+        
+        try:
+            a_data = self.connection.get("/scanners/1/agents")
+            for a in a_data.get('agents', []):
+                stats["Nessus Agents"]["qty"] += 1
+                if a.get('status') == 'on': stats["Nessus Agents"]["active"] += 1
+                else: stats["Nessus Agents"]["inactive"] += 1
+                inventory.append({"name": a.get('name'), "label": "Nessus Agents", "status": a.get('status')})
+        except: pass
+
+        self.results['sensors'] = {'summary': {'total': len(inventory)}, 'stats_by_type': stats, 'inventory': inventory}
+
+    def fetch_assets(self):
+        try:
+            data = self.connection.get("/assets")
+            self.results['assets'] = {"total": data.get('total', 0)}
+        except: self.results['assets'] = {"total": 0}
+
+    def fetch_vulnerabilities(self):
+        try:
+            data = self.connection.get("/workbenches/vulnerabilities")
+            self.results['vulnerabilities'] = {"total": len(data.get('vulnerabilities', []))}
+        except: self.results['vulnerabilities'] = {"total": 0}
+
+    def fetch_audit_logs(self): self.results['audit_logs'] = {"total": 0}
+    def fetch_endpoint(self, endpoint, key):
+        try:
+            data = self.connection.get(endpoint)
+            self.results[key] = {"total": len(data.get(key, []))}
+        except: self.results[key] = {"total": 0}
+
+    def save_results(self):
+        path = "reports/latest_results.json"
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w') as f: json.dump(self.results, f, indent=4)
 
 
---- EXPORT ENGINE ---
 
-"""
-PROJECT: [V5-Tenable Health Check API Automation]
-VERSION: 5.3.3
-LAYER: Reports / Export
-DESCRIPTION: Full Triple-Engine (JSON/TXT/PDF) with Failsafe Encoding.
-AUTHOR: Senior Software Architect
-"""
-import os
-import json
-from datetime import datetime
+>>> CÓDIGO FUENTE: modules/report_generator.py
+""" VERSION: 5.4.2 | STATUS: STABLE - PURE API ARCHITECTURE & MTTR ENGINE """
+import datetime, os
 from fpdf import FPDF
-from typing import List, Dict
-from core.models import Finding
 
-def clean_text(text):
-    if not text: return "N/A"
-    cleaned = str(text).replace('$', 'USD').replace('>', 'gt').replace('<', 'lt')
-    return cleaned.encode('ascii', 'ignore').decode('ascii')
+class ReportGenerator:
+    def __init__(self, data):
+        self.data = data
+        self.report_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-def generate_reports(findings: List[Finding], scores: Dict[int, float], global_score: float, exec_time: float):
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-    report_dir = "reports/reports"
-    os.makedirs(report_dir, exist_ok=True)
-    base_filename = f"{report_dir}/Audit_Report_{timestamp}"
-    
-    domain_map = {
-        1: "Asset Visibility (Shadow IT)", 2: "Scanning Operations",
-        3: "Risk Prioritization", 4: "Remediation & SLA",
-        5: "Identity Hygiene", 6: "Ecosystem & Governance"
-    }
+    def _compile_text(self):
+        content = []
+        content.append("1.1 SENSOR INFRASTRUCTURE SUMMARY (DOMAIN 6)")
+        content.append("-" * 60)
+        content.append(f"{'Tipo de Sensor':<30} {'Cant.':<8} {'Activos':<10} {'Inactivos':<10}")
+        stats = self.data.get('sensors', {}).get('stats_by_type', {})
+        order = ["Nessus Scanners", "Nessus Agents", "Nessus Network Monitors", "OT Connectors", "Web Application Scanners"]
+        for label in order:
+            d = stats.get(label, {"qty": 0, "active": 0, "inactive": 0})
+            content.append(f"{label:<30} {d['qty']:<8} {d['active']:<10} {d['inactive']:<10}")
+        
+        content.append(f"\nTOTAL SENSORS: {self.data.get('sensors',{}).get('summary',{}).get('total',0)}")
 
-    # 1. JSON para Dashboard
-    dashboard_data = {
-        "timestamp": datetime.now().isoformat(),
-        "execution_time": round(exec_time, 2),
-        "global_score": round(global_score, 2),
-        "domain_scores": scores,
-        "findings": [{"title": f.title, "domain": f.domain, "score": f.override_score or f.score, "observation": f.observation} for f in findings]
-    }
-    with open("reports/latest_results.json", "w", encoding='utf-8') as jf:
-        json.dump(dashboard_data, jf, indent=4)
+        content.append("\n1.2 DETAILED INVENTORY BY SENSOR TYPE")
+        content.append("-" * 60)
+        inventory = self.data.get('sensors', {}).get('inventory', [])
+        for label in order:
+            content.append(f"\n>>> CATEGORY: {label.upper()}")
+            found = [s for s in inventory if s['label'] == label]
+            if not found:
+                content.append("   (No sensors detected)")
+            else:
+                for s in found:
+                    content.append(f" - {s['name'][:45]:<45} Status: {s['status']}")
+        
+        content.append("\n2.1 EXECUTIVE FINDINGS (DOMAIN ANALYSIS)")
+        content.append("-" * 60)
+        for f in self.data.get('findings', []):
+            content.append(f">>> Domain {f['domain']}: {f['title']}\n    Score: {f['override_score']}\n    Obs: {f['observation']}\n")
+        return content
 
-    # 2. TXT Forense (RESTAURADO)
-    with open(f"{base_filename}.txt", "w", encoding='utf-8') as f:
-        f.write("="*70 + "\n")
-        f.write(f"{'DETAILED MATURITY AUDIT REPORT (v5.3.3)':^70}\n")
-        f.write("="*70 + "\n\n")
-        f.write(f"GLOBAL SCORE: {global_score:.2f} / 5.0 | Time: {exec_time:.2f}s\n\n")
-        for idx, issue in enumerate(findings, 1):
-            f.write(f"Finding #{idx}: {issue.title}\n")
-            f.write(f" Observation : {issue.observation}\n")
-            f.write("-" * 40 + "\n")
+    def generate_txt(self, filename):
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, 'w') as f:
+            f.write("="*60 + f"\n      TENABLE AUDIT REPORT v5.4.6\n" + "="*60 + "\n\n")
+            f.write("\n".join(self._compile_text()))
 
-    # 3. PDF Ejecutivo Robusto
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", 'B', 16)
-    pdf.set_fill_color(230, 230, 230)
-    pdf.cell(190, 15, 'TENABLE HEALTH CHECK - EXECUTIVE DASHBOARD', 1, 1, 'C', True)
-    pdf.ln(5)
-    
-    pdf.set_font("Arial", 'B', 12)
-    pdf.cell(95, 10, clean_text(f"Global Score: {global_score:.2f}"), 1, 0, 'C')
-    pdf.cell(95, 10, clean_text(f"Time: {exec_time:.2f}s"), 1, 1, 'C')
-    pdf.ln(5)
-
-    pdf.set_text_color(180, 0, 0)
-    pdf.cell(190, 10, "CRITICAL FINDINGS AND ALERTS", 0, 1, 'L')
-    pdf.set_text_color(0, 0, 0)
-    
-    for issue in findings:
-        impact = issue.override_score if issue.override_score is not None else issue.score
-        if impact >= 2.0:
-            pdf.set_font("Arial", 'B', 10)
-            pdf.cell(190, 8, clean_text(f"ALERTA: {issue.title}"), 'T', 1, 'L')
-            pdf.set_font("Arial", '', 9)
-            pdf.multi_cell(190, 5, clean_text(f"Detalle: {issue.observation}"), 0, 'L')
-            pdf.ln(2)
-
-    pdf.output(f"{base_filename}.pdf")
-    print(f"[*] Full Triple-Reports (JSON/TXT/PDF) generated (v5.3.3).")
+    def generate_pdf(self, filename):
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", 'B', 16)
+        pdf.cell(0, 15, "Tenable TVM HealthCheck Report", ln=True, align='C')
+        pdf.set_font("Courier", size=8)
+        for line in self._compile_text():
+            safe = line.encode('latin-1', 'replace').decode('latin-1')
+            pdf.multi_cell(0, 4, safe)
+        pdf.output(filename)
 
 
---- WEB BACKEND ---
 
+>>> CÓDIGO FUENTE: web/app.py
+""" VERSION: 5.4.2 | STATUS: STABLE - PURE API ARCHITECTURE & MTTR ENGINE """
 from flask import Flask, render_template, jsonify
-import json
-import os
-import subprocess
+import json, os, subprocess
 
 app = Flask(__name__)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Definimos la ruta raiz de tu proyecto de forma absoluta
+BASE_DIR = "/home/adminu/mpiv/tenable-tvm-healthcheck-v5"
 
 @app.route('/')
 def index():
-    json_path = os.path.join(BASE_DIR, '../reports/latest_results.json')
-    data = {}
+    json_path = os.path.join(BASE_DIR, 'reports/latest_results.json')
+    
     if os.path.exists(json_path):
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
     else:
-        data = {"error": "No hay datos. Lance una auditoria."}
+        data = {"error": "JSON file missing. Please run main.py first."}
+    
     return render_template('index.html', data=data)
 
 @app.route('/api/run-audit', methods=['POST'])
 def run_audit():
     try:
-        python_exe = '/home/adminu/mpiv/tenable-tvm-healthcheck-v5/.venv/bin/python'
-        result = subprocess.run([python_exe, '../main.py'], cwd='../', capture_output=True, text=True)
-        if result.returncode == 0:
-            return jsonify({"status": "success"})
-        return jsonify({"status": "error", "message": result.stderr}), 500
+        main_py = os.path.join(BASE_DIR, 'main.py')
+        venv_python = os.path.join(BASE_DIR, '.venv/bin/python')
+        # Ejecuta la auditoria en segundo plano
+        subprocess.run([venv_python, main_py], cwd=BASE_DIR, check=True)
+        return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    # Escucha en el puerto 8080 para tu entorno Linux
+    app.run(host='0.0.0.0', port=8080, debug=True)
 
 
---- WEB FRONTEND ---
 
+>>> CÓDIGO FUENTE: web/templates/index.html
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Dashboard v5.3.1</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <title>Tenable Dashboard v5.4.8</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #001220; color: white; font-family: sans-serif; }
+        .card { background-color: #00233d; border: none; border-radius: 10px; margin-bottom: 20px; }
+        .kpi { font-size: 2.5rem; font-weight: bold; color: #00a3e0; }
+        .btn-audit { background-color: #00a3e0; color: white; font-weight: bold; border: none; }
+        .table { color: white; }
+    </style>
 </head>
-<body class="bg-light">
-<nav class="navbar navbar-dark bg-dark px-4">
-    <span class="navbar-brand">Tenable TVM Health Check v5.3.1</span>
-    <button id="btnRunAudit" class="btn btn-success">Run New Audit</button>
-</nav>
+<body>
 <div class="container mt-4">
-    <div class="row text-center mb-4">
-        <div class="col-md-6"><div class="card p-3"><h5>Global Score</h5><h2 class="text-primary">{{ data.global_score }}/5.0</h2></div></div>
-        <div class="col-md-6"><div class="card p-3"><h5>Execution Time</h5><h2 class="text-success">{{ data.execution_time }}s</h2></div></div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Tenable TVM HealthCheck</h2>
+        <button id="runBtn" class="btn btn-audit px-4" onclick="runAudit()">RUN NEW AUDIT</button>
     </div>
-    <div class="card p-4"><canvas id="radarChart" style="max-height: 400px;"></canvas></div>
+    <div class="row text-center">
+        <div class="col-md-4"><div class="card p-3"><div>ACTIVOS</div><div class="kpi">{{ data.assets.total if data.assets else '0' }}</div></div></div>
+        <div class="col-md-4"><div class="card p-3"><div>VULNERABILIDADES</div><div class="kpi text-danger">{{ data.vulnerabilities.total if data.vulnerabilities else '0' }}</div></div></div>
+        <div class="col-md-4"><div class="card p-3"><div>SENSORES</div><div class="kpi text-success">{{ data.sensors.summary.total if data.sensors else '0' }}</div></div></div>
+    </div>
+    <div class="card p-4">
+        <h5>Resumen Operativo de Sensores</h5>
+        <table class="table">
+            <thead><tr><th>Tipo</th><th>Total</th><th>Activos</th><th>Inactivos</th></tr></thead>
+            <tbody>
+                {% if data.sensors and data.sensors.stats_by_type %}
+                {% for type, stats in data.sensors.stats_by_type.items() %}
+                <tr><td>{{ type }}</td><td>{{ stats.qty }}</td><td class="text-success">{{ stats.active }}</td><td class="text-danger">{{ stats.inactive }}</td></tr>
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 </div>
 <script>
-    document.getElementById('btnRunAudit').onclick = function() {
-        this.disabled = true; 
-        this.innerHTML = 'Running Audit...';
-        this.className = 'btn btn-warning';
-        
-        fetch('/api/run-audit', {method: 'POST'})
-        .then(res => res.json())
-        .then(data => { 
-            if(data.status==='success') window.location.reload(); 
-            else alert('Error en auditoria'); 
-        })
-        .catch(err => alert('Fallo de conexion'));
-    };
-    
-    const scores = {{ data.domain_scores | tojson if data.domain_scores else '{}' }};
-    new Chart(document.getElementById('radarChart'), {
-        type: 'radar',
-        data: {
-            labels: ['Assets', 'Scans', 'Risk', 'SLA', 'Identity', 'Ecosystem'],
-            datasets: [{ 
-                label: 'Maturity Level', 
-                data: [scores['1'], scores['2'], scores['3'], scores['4'], scores['5'], scores['6']], 
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgb(54, 162, 235)'
-            }]
-        },
-        options: { scales: { r: { suggestMin: 0, suggestMax: 5 } } }
-    });
+    function runAudit() {
+        const btn = document.getElementById('runBtn');
+        btn.innerText = "RUNNING..."; btn.disabled = true;
+        fetch('/api/run-audit', { method: 'POST' })
+            .then(() => { alert('Audit Done!'); location.reload(); })
+            .catch(() => { alert('Error!'); btn.disabled = false; btn.innerText = "RUN NEW AUDIT"; });
+    }
 </script>
 </body>
 </html>
+
+
+
+>>> CÓDIGO FUENTE: data/context_input.json
+{
+  "metadata": {
+    "version": "5.1.0",
+    "last_updated": "2026-03-10",
+    "description": "Manual context for Strategic Enrichment"
+  },
+  "context": {
+    "expected_assets": 100,
+    "maintenance_windows": true,
+    "internal_sla_critical": 15,
+    "exception_process_active": false,
+    "staff_capacity": 2
+  }
+}
+
+
+

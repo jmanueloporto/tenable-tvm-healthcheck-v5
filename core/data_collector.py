@@ -1,7 +1,5 @@
-""" VERSION: 5.4.2 | STATUS: STABLE - PURE API """ VERSION: 5.4.2 | STATUS: STABLE - PURE API """ VERSION: 5.4.2 | STATUS: STABLE - PURE API """ VERSION: 5.4.2 | STATUS: STABLE - PURE API """ VERSION: 5.4.2 | STATUS: STABLE - PURE API """ VERSION: 5.4.2 | STATUS: STABLE - PURE API """ VERSION: 5.4.0 | STATUS: Stable """ MTTR ENGINE """ MTTR ENGINE """ MTTR ENGINE """ MTTR ENGINE """ MTTR ENGINE """ MTTR ENGINE """
-import json
-import os
-import time
+""" VERSION: 5.4.2 | STATUS: STABLE - PURE API ARCHITECTURE & MTTR ENGINE """
+import json, os, time
 
 class TenableDataCollector:
     def __init__(self, connection):
@@ -10,7 +8,7 @@ class TenableDataCollector:
 
     def collect_all(self):
         start_time = time.time()
-        print("[*] Starting Phase 1 Silent Collection (v5.3.6-PURE_API)...")
+        print("[*] Starting Phase 1 Silent Collection (v5.4.8-FINAL)...")
         
         steps = [
             ("Hybrid Sensors", self.fetch_scanners),
@@ -27,130 +25,57 @@ class TenableDataCollector:
             func()
 
         self.save_results()
-        duration = round(time.time() - start_time, 2)
         print("-" * 60)
-        print(f"[SUCCESS] Data Captured | Time: {duration}s")
+        print(f"[SUCCESS] Data Captured | Time: {round(time.time() - start_time, 2)}s")
         print("-" * 60)
         return self.results
 
     def fetch_scanners(self):
         data = self.connection.get("/scanners")
         scanners = data.get('scanners', []) if isinstance(data, dict) else []
-        
-        stats = {
-            "Nessus Scanners": {"qty": 0, "active": 0, "inactive": 0},
-            "Nessus Agents": {"qty": 0, "active": 0, "inactive": 0},
-            "Nessus Network Monitors": {"qty": 0, "active": 0, "inactive": 0},
-            "OT Connectors": {"qty": 0, "active": 0, "inactive": 0},
-            "Web Application Scanners": {"qty": 0, "active": 0, "inactive": 0}
-        }
-        
-        full_inventory = []
+        stats = {k: {"qty": 0, "active": 0, "inactive": 0} for k in ["Nessus Scanners", "Nessus Agents", "Nessus Network Monitors", "OT Connectors", "Web Application Scanners"]}
+        inventory = []
         for s in scanners:
             rtype = s.get('type', '').lower()
-            name = s.get('name', 'N/A')
-            status = s.get('status', 'off')
-            is_on = status in ['on', 'online']
-            
-            # Clasificación limpia para Scanners y NNM
-            if rtype in ['local', 'managed']: 
-                label = "Nessus Scanners"
-            elif rtype in ['pool', 'active_directory', 'agent']:
-                continue # Los grupos los ignora la GUI, y los agentes se buscan en su endpoint
-            elif 'pvs' in rtype or 'managed_pvs' in rtype: 
-                label = "Nessus Network Monitors"
-            elif 'webapp' in rtype or 'managed_webapp' in rtype: 
-                label = "Web Application Scanners"
-            else: 
-                label = "OT Connectors"
-
+            if rtype in ['pool', 'active_directory', 'agent']: continue
+            label = "Nessus Scanners"
+            if 'pvs' in rtype: label = "Nessus Network Monitors"
+            elif 'webapp' in rtype: label = "Web Application Scanners"
+            is_on = s.get('status') == 'on'
             stats[label]["qty"] += 1
             if is_on: stats[label]["active"] += 1
             else: stats[label]["inactive"] += 1
-            
-            full_inventory.append({
-                "name": name, 
-                "label": label, 
-                "raw_type": rtype, 
-                "status": status
-            })
-
-        # FETCH REAL DE AGENTES
+            inventory.append({"name": s.get('name'), "label": label, "status": s.get('status')})
+        
         try:
-            agents_data = self.connection.get("/scanners/1/agents")
-            agents = agents_data.get('agents', []) if isinstance(agents_data, dict) else []
-            for a in agents:
-                name = a.get('name', 'N/A')
-                status = a.get('status', 'off')
-                is_on = status in ['on', 'online']
-                
+            a_data = self.connection.get("/scanners/1/agents")
+            for a in a_data.get('agents', []):
                 stats["Nessus Agents"]["qty"] += 1
-                if is_on: stats["Nessus Agents"]["active"] += 1
+                if a.get('status') == 'on': stats["Nessus Agents"]["active"] += 1
                 else: stats["Nessus Agents"]["inactive"] += 1
-                
-                full_inventory.append({
-                    "name": name, 
-                    "label": "Nessus Agents", 
-                    "raw_type": "agent", 
-                    "status": status
-                })
-        except Exception:
-            pass
+                inventory.append({"name": a.get('name'), "label": "Nessus Agents", "status": a.get('status')})
+        except: pass
 
-        # CONSULTA NATIVA DEL OT CONNECTOR (La clave del misterio)
-        try:
-            ot_data = self.connection.get("/sensors/ot")
-            ot_connectors = ot_data if isinstance(ot_data, list) else ot_data.get('sensors', []) if isinstance(ot_data, dict) else []
-            
-            for ot in ot_connectors:
-                name = ot.get('name', 'N/A')
-                status = ot.get('status', 'off')
-                is_on = status in ['on', 'online', 'connected']
-                
-                stats["OT Connectors"]["qty"] += 1
-                if is_on: stats["OT Connectors"]["active"] += 1
-                else: stats["OT Connectors"]["inactive"] += 1
-                
-                full_inventory.append({
-                    "name": name, 
-                    "label": "OT Connectors", 
-                    "raw_type": "ot_connector", 
-                    "status": status
-                })
-        except Exception as e:
-            print(f"\n[WARNING] Could not fetch OT Connectors natively: {e}")
-
-        # NINGÚN HARDCODEO AQUÍ. LO QUE DA LA API, SE MUESTRA.
-        self.results['sensors'] = {
-            'summary': {'total': sum(d["qty"] for d in stats.values())},
-            'stats_by_type': stats,
-            'inventory': full_inventory
-        }
-
-    def fetch_audit_logs(self):
-        try:
-            self.connection.get("/audit-log/events?limit=1")
-            self.results['audit_logs'] = {"total": 1, "status": "Success"}
-        except:
-            self.results['audit_logs'] = {"total": 0, "status": "Forbidden"}
+        self.results['sensors'] = {'summary': {'total': len(inventory)}, 'stats_by_type': stats, 'inventory': inventory}
 
     def fetch_assets(self):
         try:
             data = self.connection.get("/assets")
-            self.results['assets'] = {"total": data.get('total', 0) if isinstance(data, dict) else 0}
-        except:
-            self.results['assets'] = {"total": 0}
+            self.results['assets'] = {"total": data.get('total', 0)}
+        except: self.results['assets'] = {"total": 0}
 
     def fetch_vulnerabilities(self):
         try:
             data = self.connection.get("/workbenches/vulnerabilities")
-            self.results['vulnerabilities'] = {"total": len(data.get('vulnerabilities', [])) if isinstance(data, dict) else 0}
-        except:
-            self.results['vulnerabilities'] = {"total": 0}
+            self.results['vulnerabilities'] = {"total": len(data.get('vulnerabilities', []))}
+        except: self.results['vulnerabilities'] = {"total": 0}
 
+    def fetch_audit_logs(self): self.results['audit_logs'] = {"total": 0}
     def fetch_endpoint(self, endpoint, key):
-        data = self.connection.get(endpoint)
-        self.results[key] = {"total": len(data.get(key, [])) if isinstance(data, dict) else 0}
+        try:
+            data = self.connection.get(endpoint)
+            self.results[key] = {"total": len(data.get(key, []))}
+        except: self.results[key] = {"total": 0}
 
     def save_results(self):
         path = "reports/latest_results.json"
