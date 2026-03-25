@@ -1,3 +1,4 @@
+""" VERSION: 5.5.0-STABLE | STATUS: DASHBOARD UI V2 (CHART.JS) """
 import json
 import os
 import subprocess
@@ -12,7 +13,7 @@ def load_data_safe():
     default_data = {
         "assets": {"total": 0},
         "vulnerabilities": {"total": 0},
-        "sensors": {"summary": {"total": 0}, "stats_by_type": {}},
+        "sensors": {"summary": {"total": 0}, "stats_by_type": {}, "inventory": []},
         "findings": []
     }
     json_path = os.path.join(BASE_DIR, 'reports/latest_results.json')

@@ -2,99 +2,132 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Tenable Dashboard v5.5.0-DEV</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenable TVM HealthCheck v5.5.0</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background-color: #001220; color: white; font-family: 'Segoe UI', sans-serif; }
-        .card { background-color: #00233d; border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .kpi { font-size: 2.8rem; font-weight: bold; color: #00a3e0; }
-        .btn-audit { background-color: #00a3e0; color: white; font-weight: bold; border: none; transition: 0.3s; }
-        .btn-audit:hover { background-color: #0081b1; transform: scale(1.02); }
-        .table { color: white; border-color: #003057; }
-        .badge-critical { background-color: #ff4d4d; color: white; }
-        .badge-warning { background-color: #ffcc00; color: #001220; }
-        .domain-tag { font-size: 0.8rem; font-weight: bold; color: #00a3e0; text-transform: uppercase; }
+        body { background-color: #0b0e14; color: #e1e1e1; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { background-color: #161b22; border: 1px solid #30363d; color: white; margin-bottom: 20px; }
+        .sensor-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin: 2px; }
+        .bg-on { background-color: #238636; box-shadow: 0 0 5px #238636; }
+        .bg-off { background-color: #da3633; }
+        .status-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 12px; }
+        .finding-critical { border-left: 5px solid #da3633; }
+        .finding-warning { border-left: 5px solid #d29922; }
+        .finding-info { border-left: 5px solid #388bfd; }
     </style>
 </head>
 <body>
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-5">
-        <h2 class="fw-bold">Tenable TVM <span style="color: #00a3e0;">HealthCheck v5.5.0</span></h2>
-        <button id="runBtn" class="btn btn-audit px-5 py-2" onclick="runAudit()">RUN NEW AUDIT</button>
-    </div>
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Tenable Strategic Dashboard <span class="badge bg-primary">v5.5.0-STABLE</span></h2>
+            <button class="btn btn-outline-primary" onclick="runAudit()" id="auditBtn">RUN NEW AUDIT</button>
+        </div>
 
-    <div class="row text-center mb-4">
-        <div class="col-md-4"><div class="card p-4"><div class="opacity-50 small">ACTIVOS</div><div class="kpi">{{ data.assets.total if data.assets else '0' }}</div></div></div>
-        <div class="col-md-4"><div class="card p-4"><div class="opacity-50 small text-danger">VULNERABILIDADES</div><div class="kpi text-danger">{{ data.vulnerabilities.total if data.vulnerabilities else '0' }}</div></div></div>
-        <div class="col-md-4"><div class="card p-4"><div class="opacity-50 small text-success">SENSORES</div><div class="kpi text-success">{{ data.sensors.summary.total if data.sensors else '0' }}</div></div></div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card p-4 h-100">
-                <h5 class="mb-4 fw-bold text-info">Hallazgos de Auditoría (Shadow IT & SLAs)</h5>
-                <div class="table-responsive">
-                    <table class="table align-middle">
-                        <thead>
-                            <tr>
-                                <th>Dominio</th>
-                                <th>Hallazgo</th>
-                                <th>Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if data.findings %}
-                                {% for f in data.findings %}
-                                <tr>
-                                    <td><span class="domain-tag">Dom {{ f.domain }}</span></td>
-                                    <td>
-                                        <div class="fw-bold">{{ f.title }}</div>
-                                        <div class="small opacity-75">{{ f.observation }}</div>
-                                    </td>
-                                    <td>
-                                        <span class="badge {{ 'badge-critical' if f.override_score >= 8 else 'badge-warning' }}">
-                                            {{ f.override_score }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr><td colspan="3" class="text-center opacity-50">No se detectaron brechas críticas.</td></tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <h6>Visibilidad de Inventario</h6>
+                    <canvas id="vizChart"></canvas>
+                    <h4 class="mt-2">{{ data.assets.total }} / 100</h4>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <h6>Mosaico de Salud de Sensores ({{ data.sensors.summary.total }})</h6>
+                    <div class="d-flex flex-wrap mt-2">
+                        {% for s in data.sensors.inventory %}
+                        <div class="sensor-dot {% if s.status == 'on' %}bg-on{% else %}bg-off{% endif %}" 
+                             title="{{ s.name }} ({{ s.label }})"></div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-3 small d-flex justify-content-around">
+                        <span><i class="sensor-dot bg-on"></i> Online: {{ data.sensors.stats_by_type['Nessus Scanners'].active + data.sensors.stats_by_type['Nessus Agents'].active }}</span>
+                        <span><i class="sensor-dot bg-off"></i> Offline: {{ data.sensors.stats_by_type['Nessus Scanners'].inactive + data.sensors.stats_by_type['Nessus Agents'].inactive }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <h6>Vulnerabilidades Abiertas</h6>
+                    <h1 class="display-4 text-danger">{{ data.vulnerabilities.total }}</h1>
+                    <p class="text-muted">Estado Actual de Riesgo</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card p-4 h-100">
-                <h5 class="mb-4 fw-bold text-info">Infraestructura</h5>
-                <ul class="list-group list-group-flush">
-                    {% if data.sensors and data.sensors.stats_by_type %}
-                    {% for type, stats in data.sensors.stats_by_type.items() %}
-                    <li class="list-group-item bg-transparent border-secondary d-flex justify-content-between text-white px-0">
-                        <span class="small">{{ type }}</span>
-                        <span class="fw-bold">{{ stats.qty }}</span>
-                    </li>
-                    {% endfor %}
-                    {% endif %}
-                </ul>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header border-bottom border-secondary">Hallazgos Estratégicos</div>
+                    <div class="card-body">
+                        {% for f in data.findings %}
+                        <div class="p-3 mb-3 {% if f.override_score|float >= 8 %}finding-critical{% elif f.override_score|float >= 5 %}finding-warning{% else %}finding-info{% endif %}" style="background: #0d1117;">
+                            <div class="d-flex justify-content-between">
+                                <strong>[DOM {{ f.domain }}] {{ f.title }}</strong>
+                                <span class="badge {% if f.override_score|float >= 8 %}bg-danger{% else %}bg-warning{% endif %}">Score: {{ f.override_score }}</span>
+                            </div>
+                            <p class="small mb-0 mt-2 text-secondary">{{ f.observation }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header border-bottom border-secondary">Distribución de Sensores</div>
+                    <div class="card-body">
+                        <canvas id="sensorTypeChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    function runAudit() {
-        const btn = document.getElementById('runBtn');
-        btn.innerText = "RUNNING..."; btn.disabled = true;
-        fetch('/api/run-audit', { method: 'POST' })
-            .then(r => r.json())
-            .then(res => { if(res.status === 'success') { location.reload(); } else { alert("Error"); resetBtn(); } })
-            .catch(() => { alert("Error"); resetBtn(); });
-    }
-    function resetBtn() { const btn = document.getElementById('runBtn'); btn.disabled = false; btn.innerText = "RUN NEW AUDIT"; }
-</script>
+    <script>
+        // Gráfico de Visibilidad (Donut)
+        new Chart(document.getElementById('vizChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Vistos', 'Shadow IT'],
+                datasets: [{
+                    data: [{{ data.assets.total }}, 100 - {{ data.assets.total }}],
+                    backgroundColor: ['#238636', '#da3633'],
+                    borderWidth: 0
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, cutout: '80%' }
+        });
+
+        // Gráfico de Tipos de Sensores
+        new Chart(document.getElementById('sensorTypeChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Scanners', 'Agents', 'NNM', 'WAS'],
+                datasets: [{
+                    label: 'Cantidad',
+                    data: [
+                        {{ data.sensors.stats_by_type['Nessus Scanners'].qty if 'Nessus Scanners' in data.sensors.stats_by_type else 0 }},
+                        {{ data.sensors.stats_by_type['Nessus Agents'].qty if 'Nessus Agents' in data.sensors.stats_by_type else 0 }},
+                        {{ data.sensors.stats_by_type['Nessus Network Monitors'].qty if 'Nessus Network Monitors' in data.sensors.stats_by_type else 0 }},
+                        {{ data.sensors.stats_by_type['Web Application Scanners'].qty if 'Web Application Scanners' in data.sensors.stats_by_type else 0 }}
+                    ],
+                    backgroundColor: '#388bfd'
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+        });
+
+        async function runAudit() {
+            const btn = document.getElementById('auditBtn');
+            btn.disabled = true;
+            btn.innerText = "RUNNING AUDIT...";
+            try {
+                const response = await fetch('/api/run-audit', { method: 'POST' });
+                if (response.ok) { location.reload(); }
+            } catch (e) { alert("Error: " + e); btn.disabled = false; btn.innerText = "RUN NEW AUDIT"; }
+        }
+    </script>
 </body>
 </html>
