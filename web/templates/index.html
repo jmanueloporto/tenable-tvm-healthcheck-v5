@@ -2,49 +2,99 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Tenable Dashboard v5.4.2</title>
+    <title>Tenable Dashboard v5.5.0-DEV</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
     <style>
-        body { background-color: #001220; color: white; font-family: sans-serif; }
-        .card { background-color: #00233d; border: none; border-radius: 10px; margin-bottom: 20px; }
-        .kpi { font-size: 2.5rem; font-weight: bold; color: #00a3e0; }
-        .btn-audit { background-color: #00a3e0; color: white; font-weight: bold; border: none; }
-        .table { color: white; }
+        body { background-color: #001220; color: white; font-family: 'Segoe UI', sans-serif; }
+        .card { background-color: #00233d; border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .kpi { font-size: 2.8rem; font-weight: bold; color: #00a3e0; }
+        .btn-audit { background-color: #00a3e0; color: white; font-weight: bold; border: none; transition: 0.3s; }
+        .btn-audit:hover { background-color: #0081b1; transform: scale(1.02); }
+        .table { color: white; border-color: #003057; }
+        .badge-critical { background-color: #ff4d4d; color: white; }
+        .badge-warning { background-color: #ffcc00; color: #001220; }
+        .domain-tag { font-size: 0.8rem; font-weight: bold; color: #00a3e0; text-transform: uppercase; }
     </style>
 </head>
 <body>
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Tenable TVM HealthCheck</h2>
-        <button id="runBtn" class="btn btn-audit px-4" onclick="runAudit()">RUN NEW AUDIT</button>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h2 class="fw-bold">Tenable TVM <span style="color: #00a3e0;">HealthCheck v5.5.0</span></h2>
+        <button id="runBtn" class="btn btn-audit px-5 py-2" onclick="runAudit()">RUN NEW AUDIT</button>
     </div>
-    <div class="row text-center">
-        <div class="col-md-4"><div class="card p-3"><div>ACTIVOS</div><div class="kpi">{{ data.assets.total if data.assets else '0' }}</div></div></div>
-        <div class="col-md-4"><div class="card p-3"><div>VULNERABILIDADES</div><div class="kpi text-danger">{{ data.vulnerabilities.total if data.vulnerabilities else '0' }}</div></div></div>
-        <div class="col-md-4"><div class="card p-3"><div>SENSORES</div><div class="kpi text-success">{{ data.sensors.summary.total if data.sensors else '0' }}</div></div></div>
+
+    <div class="row text-center mb-4">
+        <div class="col-md-4"><div class="card p-4"><div class="opacity-50 small">ACTIVOS</div><div class="kpi">{{ data.assets.total if data.assets else '0' }}</div></div></div>
+        <div class="col-md-4"><div class="card p-4"><div class="opacity-50 small text-danger">VULNERABILIDADES</div><div class="kpi text-danger">{{ data.vulnerabilities.total if data.vulnerabilities else '0' }}</div></div></div>
+        <div class="col-md-4"><div class="card p-4"><div class="opacity-50 small text-success">SENSORES</div><div class="kpi text-success">{{ data.sensors.summary.total if data.sensors else '0' }}</div></div></div>
     </div>
-    <div class="card p-4">
-        <h5>Resumen Operativo de Sensores</h5>
-        <table class="table">
-            <thead><tr><th>Tipo</th><th>Total</th><th>Activos</th><th>Inactivos</th></tr></thead>
-            <tbody>
-                {% if data.sensors and data.sensors.stats_by_type %}
-                {% for type, stats in data.sensors.stats_by_type.items() %}
-                <tr><td>{{ type }}</td><td>{{ stats.qty }}</td><td class="text-success">{{ stats.active }}</td><td class="text-danger">{{ stats.inactive }}</td></tr>
-                {% endfor %}
-                {% endif %}
-            </tbody>
-        </table>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card p-4 h-100">
+                <h5 class="mb-4 fw-bold text-info">Hallazgos de Auditoría (Shadow IT & SLAs)</h5>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Dominio</th>
+                                <th>Hallazgo</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if data.findings %}
+                                {% for f in data.findings %}
+                                <tr>
+                                    <td><span class="domain-tag">Dom {{ f.domain }}</span></td>
+                                    <td>
+                                        <div class="fw-bold">{{ f.title }}</div>
+                                        <div class="small opacity-75">{{ f.observation }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ 'badge-critical' if f.override_score >= 8 else 'badge-warning' }}">
+                                            {{ f.override_score }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="3" class="text-center opacity-50">No se detectaron brechas críticas.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-4 h-100">
+                <h5 class="mb-4 fw-bold text-info">Infraestructura</h5>
+                <ul class="list-group list-group-flush">
+                    {% if data.sensors and data.sensors.stats_by_type %}
+                    {% for type, stats in data.sensors.stats_by_type.items() %}
+                    <li class="list-group-item bg-transparent border-secondary d-flex justify-content-between text-white px-0">
+                        <span class="small">{{ type }}</span>
+                        <span class="fw-bold">{{ stats.qty }}</span>
+                    </li>
+                    {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
+
 <script>
     function runAudit() {
         const btn = document.getElementById('runBtn');
         btn.innerText = "RUNNING..."; btn.disabled = true;
         fetch('/api/run-audit', { method: 'POST' })
-            .then(() => { alert('Audit Done!'); location.reload(); })
-            .catch(() => { alert('Error!'); btn.disabled = false; btn.innerText = "RUN NEW AUDIT"; });
+            .then(r => r.json())
+            .then(res => { if(res.status === 'success') { location.reload(); } else { alert("Error"); resetBtn(); } })
+            .catch(() => { alert("Error"); resetBtn(); });
     }
+    function resetBtn() { const btn = document.getElementById('runBtn'); btn.disabled = false; btn.innerText = "RUN NEW AUDIT"; }
 </script>
 </body>
 </html>

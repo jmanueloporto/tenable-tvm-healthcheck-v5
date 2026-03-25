@@ -1,4 +1,4 @@
-""" VERSION: 5.4.2 | STATUS: STABLE - PURE API ARCHITECTURE & MTTR ENGINE """
+""" VERSION: 5.5.0-STABLE | STATUS: DOMAIN 1 READY """
 import datetime, os
 from fpdf import FPDF
 
@@ -9,9 +9,11 @@ class ReportGenerator:
 
     def _compile_text(self):
         content = []
-        content.append("1.1 SENSOR INFRASTRUCTURE SUMMARY (DOMAIN 6)")
+        # SECCIÓN 1: INFRAESTRUCTURA (Recuperado de v5.4.2)
+        content.append("1.1 SENSOR INFRASTRUCTURE SUMMARY")
         content.append("-" * 60)
         content.append(f"{'Tipo de Sensor':<30} {'Cant.':<8} {'Activos':<10} {'Inactivos':<10}")
+        
         stats = self.data.get('sensors', {}).get('stats_by_type', {})
         order = ["Nessus Scanners", "Nessus Agents", "Nessus Network Monitors", "OT Connectors", "Web Application Scanners"]
         for label in order:
@@ -32,24 +34,30 @@ class ReportGenerator:
                 for s in found:
                     content.append(f" - {s['name'][:45]:<45} Status: {s['status']}")
         
-        content.append("\n2.1 EXECUTIVE FINDINGS (DOMAIN ANALYSIS)")
+        # SECCIÓN 2: HALLAZGOS ESTRATÉGICOS (Nuevo de v5.5.0)
+        content.append("\n\n2.1 EXECUTIVE FINDINGS (DOMAIN ANALYSIS)")
         content.append("-" * 60)
-        for f in self.data.get('findings', []):
-            content.append(f">>> Domain {f['domain']}: {f['title']}\n    Score: {f['override_score']}\n    Obs: {f['observation']}\n")
+        findings = self.data.get('findings', [])
+        if findings:
+            for f in findings:
+                content.append(f">>> [DOM {f['domain']}] {f['title']}\n    Score: {f['override_score']}\n    Obs: {f['observation']}\n")
+        else:
+            content.append("No critical findings detected.")
+            
         return content
 
     def generate_txt(self, filename):
         os.makedirs(os.path.dirname(filename), exist_ok=True)
-        with open(filename, 'w') as f:
-            f.write("="*60 + f"\n      TENABLE AUDIT REPORT v5.4.2\n" + "="*60 + "\n\n")
-            f.write("\n".join(self._compile_text()))
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write("="*60 + f"\n      TENABLE AUDIT REPORT v5.5.0-DEV\n" + "="*60 + "\n\n")
+            f.writelines([line + "\n" for line in self._compile_text()])
 
     def generate_pdf(self, filename):
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", 'B', 16)
-        pdf.cell(0, 15, "Tenable TVM HealthCheck Report", ln=True, align='C')
+        pdf.set_font("Arial", 'B', 14)
+        pdf.cell(0, 10, "Tenable TVM HealthCheck Report v5.5.0", ln=True, align='C')
         pdf.set_font("Courier", size=8)
         for line in self._compile_text():
             safe = line.encode('latin-1', 'replace').decode('latin-1')

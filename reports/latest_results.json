@@ -11,8 +11,8 @@
             },
             "Nessus Agents": {
                 "qty": 12,
-                "active": 4,
-                "inactive": 8
+                "active": 3,
+                "inactive": 9
             },
             "Nessus Network Monitors": {
                 "qty": 7,
@@ -259,7 +259,7 @@
             {
                 "name": "MPIV-JM",
                 "label": "Nessus Agents",
-                "status": "on"
+                "status": "off"
             },
             {
                 "name": "MPIV-JO-WIN",
@@ -284,7 +284,8 @@
         ]
     },
     "assets": {
-        "total": 11
+        "total": 11,
+        "list": []
     },
     "scans": {
         "total": 608
@@ -300,5 +301,31 @@
     },
     "audit_logs": {
         "total": 0
-    }
+    },
+    "findings": [
+        {
+            "domain": 1,
+            "title": "Inventory Visibility Gap (Shadow IT)",
+            "observation": "Se detect\u00f3 una brecha de visibilidad del 89.0% (89 activos faltantes) frente al inventario esperado de 100.",
+            "override_score": 8.5
+        },
+        {
+            "domain": 1,
+            "title": "Stale Assets Detected",
+            "observation": "Existen activos en el inventario que no han reportado actividad en los \u00faltimos 7 d\u00edas. Riesgo de persistencia de vulnerabilidades.",
+            "override_score": 7.0
+        },
+        {
+            "domain": 4,
+            "title": "SLA Breach Detected",
+            "override_score": 5.0,
+            "observation": "Todas las vulnerabilidades activas estan dentro de los tiempos aceptables del SLA."
+        },
+        {
+            "domain": 4,
+            "title": "SLA Performance: Global MTTR",
+            "override_score": 3.0,
+            "observation": "No hay suficientes vulnerabilidades en estado FIXED con fechas validas para calcular un MTTR historico."
+        }
+    ]
 }

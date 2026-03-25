@@ -1,4 +1,4 @@
-""" VERSION: 5.4.2 | STATUS: STABLE - PURE API ARCHITECTURE & MTTR ENGINE """
+""" VERSION: 5.5.0-STABLE | STATUS: DOMAIN 1 READY """
 import json, os, time
 
 class TenableDataCollector:
@@ -8,7 +8,7 @@ class TenableDataCollector:
 
     def collect_all(self):
         start_time = time.time()
-        print("[*] Starting Phase 1 Silent Collection (v5.4.8-FINAL)...")
+        print("[*] Starting Data Collection (v5.5.0-DEV)...")
         
         steps = [
             ("Hybrid Sensors", self.fetch_scanners),
@@ -24,7 +24,9 @@ class TenableDataCollector:
             print(f" [Step {i}/7] Fetching {name}...")
             func()
 
+        self.results['findings'] = [] # Placeholder para dominios
         self.save_results()
+        
         print("-" * 60)
         print(f"[SUCCESS] Data Captured | Time: {round(time.time() - start_time, 2)}s")
         print("-" * 60)
@@ -61,8 +63,9 @@ class TenableDataCollector:
     def fetch_assets(self):
         try:
             data = self.connection.get("/assets")
-            self.results['assets'] = {"total": data.get('total', 0)}
-        except: self.results['assets'] = {"total": 0}
+            # Guardamos el total y una lista vacía para futura expansión de detalles
+            self.results['assets'] = {"total": data.get('total', 0), "list": []}
+        except: self.results['assets'] = {"total": 0, "list": []}
 
     def fetch_vulnerabilities(self):
         try:
@@ -71,6 +74,7 @@ class TenableDataCollector:
         except: self.results['vulnerabilities'] = {"total": 0}
 
     def fetch_audit_logs(self): self.results['audit_logs'] = {"total": 0}
+    
     def fetch_endpoint(self, endpoint, key):
         try:
             data = self.connection.get(endpoint)

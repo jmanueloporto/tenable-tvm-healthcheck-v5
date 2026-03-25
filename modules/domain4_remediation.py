@@ -1,4 +1,4 @@
-""" VERSION: 5.4.2 | STATUS: STABLE - PURE API ARCHITECTURE & MTTR ENGINE """
+""" VERSION: 5.5.0-STABLE | STATUS: DOMAIN 1 READY """
 
 from datetime import datetime
 
