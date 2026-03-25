@@ -11,8 +11,8 @@
             },
             "Nessus Agents": {
                 "qty": 12,
-                "active": 3,
-                "inactive": 9
+                "active": 5,
+                "inactive": 7
             },
             "Nessus Network Monitors": {
                 "qty": 7,
@@ -259,7 +259,7 @@
             {
                 "name": "MPIV-JM",
                 "label": "Nessus Agents",
-                "status": "off"
+                "status": "on"
             },
             {
                 "name": "MPIV-JO-WIN",
@@ -274,7 +274,7 @@
             {
                 "name": "MPIV-NV",
                 "label": "Nessus Agents",
-                "status": "off"
+                "status": "on"
             },
             {
                 "name": "TENA000289.local",

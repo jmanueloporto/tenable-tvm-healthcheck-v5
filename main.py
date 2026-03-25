@@ -24,11 +24,10 @@ def main():
     context_data = load_local_context()
     master_data['findings'] = []
 
-    # Ejecución de Dominios con manejo de errores
+    # Ejecución de Dominios
     try:
         dom1 = domain1_assets.AssetAuditor(master_data, context_data)
         master_data['findings'].extend(dom1.run_audit())
-        
         dom4 = domain4_remediation.RemediationAuditor(master_data)
         master_data['findings'].extend(dom4.run_audit())
     except Exception as e:
